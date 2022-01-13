@@ -3,6 +3,7 @@ package com.pedroblome.user.model;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -75,24 +76,19 @@ public class User {
     public void setUpdated_on(Timestamp updated_on) {
         this.updated_on = updated_on;
     }
-
-    public User() {
-        this.enabled = true;
+    public User(){
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
-
     }
+    // public User() {
+    //     this.enabled = true;
+    //     this.created_on = Timestamp.valueOf(LocalDateTime.now());
+    //     this.updated_on = Timestamp.valueOf(LocalDateTime.now());
 
-    // public User(Long id, String name, String password, BigDecimal dollar_balance, boolean enabled, Timestamp created_on,
-    //         Timestamp updated_on) {
-    //     this.id = id;
-    //     this.name = name;
-    //     this.password = password;
-    //     this.dollar_balance = dollar_balance;
-    //     this.enabled = enabled;
-    //     this.created_on = created_on;
-    //     this.updated_on = updated_on;
+        
+
     // }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -104,22 +100,4 @@ public class User {
     private int result() {
         return 0;
     }
-
-    // @Override
-    // public boolean equals(Object obj) {
-    //     if (this == obj)
-    //         return true;
-    //     if (obj == null)
-    //         return false;
-    //     if (getClass() != obj.getClass())
-    //         return false;
-    //     UserOrder other = (UserOrder) obj;
-    //     if (id == null) {
-    //         if (other.id != null)
-    //             return false;
-    //     } else if (!id.equals(other.id))
-    //         return false;
-    //     return true;
-
-    // }
 }
