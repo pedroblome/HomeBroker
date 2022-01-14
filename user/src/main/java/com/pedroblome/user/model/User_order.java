@@ -4,12 +4,18 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_order")
 public class User_order {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JoinColumn(name = "id")
     private Long id;
     private long id_user;
     private long id_stock;
@@ -17,7 +23,6 @@ public class User_order {
     private String stock_name;
     private Timestamp created_on;
     private Timestamp updated_on;
-    private Enum type;
     private Integer volume;
     private Integer status;
 

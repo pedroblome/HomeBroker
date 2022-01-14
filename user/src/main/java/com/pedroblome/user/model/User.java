@@ -3,7 +3,6 @@ package com.pedroblome.user.model;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -76,18 +75,12 @@ public class User {
     public void setUpdated_on(Timestamp updated_on) {
         this.updated_on = updated_on;
     }
-    public User(){
+
+    public User() {
+        this.enabled = true;
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
-    // public User() {
-    //     this.enabled = true;
-    //     this.created_on = Timestamp.valueOf(LocalDateTime.now());
-    //     this.updated_on = Timestamp.valueOf(LocalDateTime.now());
-
-        
-
-    // }
 
     @Override
     public int hashCode() {
