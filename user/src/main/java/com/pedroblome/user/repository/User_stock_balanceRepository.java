@@ -1,10 +1,12 @@
-// package com.pedroblome.user.repository;
+package com.pedroblome.user.repository;
 
-// import com.pedroblome.user.model.User_stock_balance;
+import com.pedroblome.user.model.User_stock_ballance;
 
-// import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-// public interface User_stock_balanceRepository extends JpaRepository<User_stock_balance, Long> {
-    
-    
-// }
+@Repository
+public interface User_stock_balanceRepository extends JpaRepository<User_stock_ballance, Long> {
+
+}
+

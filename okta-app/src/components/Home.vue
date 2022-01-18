@@ -34,7 +34,7 @@ export default {
         let accessToken = this.$auth.getAccessToken();
         console.log(`Authorization: Bearer ${accessToken}`);
         try {
-          let response = await axios.get('http://localhost:8082/howcaffeinatedami',
+          let response = await axios.get('http://localhost:8081/howcaffeinatedami',
               { headers: {'Authorization': 'Bearer ' + accessToken } } );
           this.caffeineLevel = response.data;
         }
