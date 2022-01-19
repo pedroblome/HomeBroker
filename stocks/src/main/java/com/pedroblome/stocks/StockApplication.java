@@ -1,5 +1,4 @@
-package com.pedroblome.user;
-
+package com.pedroblome.stocks;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -8,10 +7,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @SpringBootApplication
-public class UserApplication {
+public class StockApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(UserApplication.class, args);
+        SpringApplication.run(StockApplication.class, args);
     }
     @Configuration
     @EnableWebSecurity

@@ -1,5 +1,6 @@
 package com.pedroblome.user.model;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -21,13 +22,31 @@ public class User_order {
     private long id_stock;
     private String stock_symbol;
     private String stock_name;
+    private Integer volume;
+    private BigDecimal price;
+    private Integer type;
+    private Integer status;
     private Timestamp created_on;
     private Timestamp updated_on;
-    private Integer volume;
-    private Integer status;
 
     public Long getId() {
-        return id;  
+        return id;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public Integer getStatus() {
@@ -90,8 +109,6 @@ public class User_order {
         this.updated_on = updated_on;
     }
 
-    
-
     public Integer getVolume() {
         return volume;
     }
@@ -100,10 +117,10 @@ public class User_order {
         this.volume = volume;
     }
 
-    public User_order(){
+    public User_order() {
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
-        
+
     }
 
 }
