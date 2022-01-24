@@ -1,5 +1,6 @@
 package com.pedroblome.stocks.controller;
 
+import com.pedroblome.stocks.controller.dto.StockRetornodto;
 import com.pedroblome.stocks.model.Stock;
 import com.pedroblome.stocks.repository.StockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +22,29 @@ public class StockController {
         return stockRepository.findAll();
     }
 
-    // @GetMapping(value = "/{id}")
-    // public Optional<Stock> searchStock(@PathVariable Long id) {
-    //     if (stockRepository.existsById(id)) {
-    //         return stockRepository.findById(id);
-
-    //     } else {
-    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-    //                 String.format("Id stock is invalid or doenst exists: ", id));
-
-    //     }
-
-    // }
     @GetMapping(value = "/{id}")
     public Optional<Stock> searchStock(@PathVariable Long id) {
+        if (stockRepository.existsById(id)) {
+            return stockRepository.findById(id);
 
-        return stockRepository.findById(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Id stock is invalid or doenst exists!"));
+
+        }
+
     }
-    // @GetMapping("{id}")
-    // public Stock searchStock(@PathVariable Long id)  {
-    // return stockRepository.getById(id);
+    //verify the user_order BUY SELL
+    @PostMapping(value = "/dto/{id}")
+    public boolean dtoStock(@RequestBody StockRetornodto stockRetornodto) {
+        Stock stock = stockRepository.findById(stockRetornodto.getId()).get();
+        if (stockRetornodto.getName().equals(stock.getStock_name())
+                && stockRetornodto.getSymbol().equals(stock.getStock_symbol())) {
+            return true;
+
+        }
+        return false;
+
+    }
+
 }

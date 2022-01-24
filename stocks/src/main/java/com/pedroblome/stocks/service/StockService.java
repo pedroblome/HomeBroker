@@ -13,22 +13,4 @@ public class StockService {
     @Autowired
     private StockRepository stockRepository;
 
-    // public boolean stock (@RequestBody Stock stock) {
-    //     if (stockRepository.existsById(stock.getId())) {
-    //         if(logica para saber se o nome == symbol == if){
-    //             System.out.println("================================");
-    //             System.out.println("id stock informado bate na descriçaõ");
-    //             System.out.println("================================");
-
-    //                             return true;
-
-    //         }
-    //     } else {
-    //             System.out.println("================================");
-    //             System.out.println("id stock informado NÃO bate na descriçaõ");
-    //             System.out.println("================================");
-    //         return false;
-    //     }
-    // }
-
 }

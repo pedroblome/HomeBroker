@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.util.HashMap;
@@ -49,19 +50,23 @@ public class User_orderController {
 
     @PostMapping
     public ResponseEntity<User_order> checkUserAdd(@RequestBody User_order user_order, User_orderService checkUser) {
-        if(user_orderService.checkUser(user_order)){
-            User_order orderSave = user_orderRepository.save(user_order);
-            return new ResponseEntity<User_order>(orderSave,HttpStatus.CREATED);
-        }
-        else{
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            
-        }
-       
-    }
-    // @GetMapping("/stock/{id}")
-    // public ResponseEntity<Stockdto> getStock(@PathVariable Long id)throws Exception{   
-    // }
+        Stockdto stockdto = new Stockdto(user_order.getId_stock(),
+                user_order.getStock_name(),
+                user_order.getStock_symbol());
 
+        if (user_orderService.checkUser(user_order) && user_orderService.checkStock(stockdto)) {
+            User_order orderSave = user_orderRepository.save(user_order);
+            return new ResponseEntity<User_order>(orderSave, HttpStatus.CREATED);
+        } else {
+             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Usuario ou dados da stock invalidos!");
+
+        }
+
+    }
+
+    // @GetMapping("/stock/{id}")
+    // public ResponseEntity<Stockdto> getStock(@PathVariable Long id)throws
+    // Exception{
+    // }
 
 }

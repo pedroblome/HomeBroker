@@ -83,6 +83,15 @@ public class User_stock_ballance {
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
+    
+
+    public User_stock_ballance(Long id_user, Long id_stock, String stock_symbol, String stock_name, Integer volume) {
+        this.id_user = id_user;
+        this.id_stock = id_stock;
+        this.stock_symbol = stock_symbol;
+        this.stock_name = stock_name;
+        this.volume = volume;
+    }
 
     @Override
     public int hashCode() {
