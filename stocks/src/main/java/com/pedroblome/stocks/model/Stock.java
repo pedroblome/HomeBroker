@@ -1,6 +1,11 @@
 package com.pedroblome.stocks.model;
 
 import javax.persistence.*;
+
+import com.pedroblome.stocks.repository.StockRepository;
+
+import org.springframework.web.bind.annotation.RequestBody;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -107,5 +112,6 @@ public class Stock {
     private int result() {
         return 0;
     }
+    
 
 }

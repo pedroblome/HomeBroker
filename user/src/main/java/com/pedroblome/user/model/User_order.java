@@ -17,6 +17,7 @@ public class User_order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "id")
+    
     private Long id;
     private long id_user;
     private long id_stock;

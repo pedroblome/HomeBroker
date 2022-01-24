@@ -21,20 +21,24 @@ public class StockController {
         return stockRepository.findAll();
     }
 
+    // @GetMapping(value = "/{id}")
+    // public Optional<Stock> searchStock(@PathVariable Long id) {
+    //     if (stockRepository.existsById(id)) {
+    //         return stockRepository.findById(id);
+
+    //     } else {
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+    //                 String.format("Id stock is invalid or doenst exists: ", id));
+
+    //     }
+
+    // }
     @GetMapping(value = "/{id}")
     public Optional<Stock> searchStock(@PathVariable Long id) {
-        if (stockRepository.existsById(id)) {
-            return stockRepository.findById(id);
 
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("Id stock is invalid or doenst exists: ", id));
-
-        }
-
+        return stockRepository.findById(id);
     }
-
     // @GetMapping("{id}")
-    // public Stock searchStock(@PathVariable Long id) throws StockNotFound {
+    // public Stock searchStock(@PathVariable Long id)  {
     // return stockRepository.getById(id);
 }

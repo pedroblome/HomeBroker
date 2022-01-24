@@ -49,11 +49,11 @@ public class UserController {
         new ResponseEntity<>("user Deleted", HttpStatus.OK);
         
     }
-    @PutMapping
-    public void UpdateUser(@PathVariable Long id){
-        Optional<User> alter = userRepository.findById(id);
+    // @PutMapping
+    // public void UpdateUser(@PathVariable Long id){
+    //     Optional<User> alter = userRepository.findById(id);
         
-    }
+    // }
 
    
 }
