@@ -11,7 +11,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "user_stock_balance")
 @IdClass(User_stock_ballancePK.class)
-public class User_stock_ballance {
+public class User_stock_balance {
 
     @Id
     private Long id_user;
@@ -79,19 +79,27 @@ public class User_stock_ballance {
         this.updated_on = updated_on;
     }
 
-    public User_stock_ballance() {
+    public User_stock_balance() {
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
-    
 
-    public User_stock_ballance(Long id_user, Long id_stock, String stock_symbol, String stock_name, Integer volume) {
+    public User_stock_balance(Long id_user, Long id_stock, String stock_symbol, String stock_name, Integer volume) {
         this.id_user = id_user;
         this.id_stock = id_stock;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
         this.volume = volume;
     }
+
+    // public User_stock_balance(Integer remaingVolume) {
+    //     this.remaingVolume = remaingVolume;
+    // }
+
+    public User_stock_balance(Integer volume) {
+        this.volume=volume;
+    }
+    
 
     @Override
     public int hashCode() {

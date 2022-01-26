@@ -26,5 +26,11 @@ public interface User_orderRepository extends JpaRepository<User_order, Long> {
     @Query(value = "Select coalesce(max(price),0) from user_order where type= '1' and status = '0' ", nativeQuery = true)
     BigDecimal selectBidMax(Long id_stock);
 
+   
+
+    
+
+      
+
 
 }

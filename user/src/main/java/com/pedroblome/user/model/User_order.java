@@ -24,6 +24,7 @@ public class User_order {
     private String stock_symbol;
     private String stock_name;
     private Integer volume;
+    private Integer remaing_volume;
     private BigDecimal price;
     private Integer type;
     private Integer status;
@@ -32,6 +33,14 @@ public class User_order {
 
     public Long getId() {
         return id;
+    }
+
+    public Integer getRemaing_volume() {
+        return remaing_volume;
+    }
+
+    public void setRemaing_volume(Integer remaing_volume) {
+        this.remaing_volume = remaing_volume;
     }
 
     public BigDecimal getPrice() {
