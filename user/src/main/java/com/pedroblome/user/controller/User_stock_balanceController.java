@@ -38,11 +38,6 @@ public class User_stock_balanceController {
     public List<?> list(@PathVariable("iduser") Long iduser) {
 
         if (!user_stock_balanceRepository.findStockByUser(iduser).isEmpty()) {
-
-            System.out.println("========================================================");
-            System.out.println(user_stock_balanceRepository.findStockByUser(iduser).toString());
-            System.out.println("========================================================");
-
             return user_stock_balanceRepository.findStockByUser(iduser);
         } else {
 

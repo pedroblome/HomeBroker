@@ -18,14 +18,12 @@ public interface User_stock_balanceRepository extends JpaRepository<User_stock_b
 
     @Query("SELECT  new com.pedroblome.user.model.User_stock_balance (stock.volume) FROM User_stock_balance stock where (stock.id_user = :id_user) and (stock.id_stock = :id_stock)")
     User_stock_balance volume(@Param("id_user") Long id_user,@Param("id_stock") Long id_stock);
+
+    @Query(value = "select * from user_stock_balance where id_user = ?1 and id_stock = ?2", nativeQuery = true)
+    User_stock_balance findByUserStock( long idUser, long idStock);
+
     
-    @Query("SELECT  new com.pedroblome.user.model.User_stock_balance (stock.remaing_volume) FROM User_stock_balance stock where (stock.id_user = :id_user) and (stock.id_stock = :id_stock)")
-    User_stock_balance remaingvolume(@Param("id_user") Long id_user,@Param("id_stock") Long id_stock);
-
-
-
    
-
 
 
 

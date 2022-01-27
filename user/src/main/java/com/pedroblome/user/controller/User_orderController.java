@@ -31,7 +31,6 @@ public class User_orderController {
     public List<User_order> list() {
         return user_orderRepository.findAll();
     }
-    
 
     // verifica se o campos de uma order são validos.
     @PostMapping
@@ -39,24 +38,27 @@ public class User_orderController {
         Stockdto stockdto = new Stockdto(user_order.getId_stock(),
                 user_order.getStock_name(),
                 user_order.getStock_symbol());
-        if (user_orderService.checkUser(user_order)) {
-            System.out.println(stockdto);
-            if (user_orderService.checkStock(stockdto)) {
-
+        if (user_orderService.checkStock(stockdto)) {
+            if (user_orderService.checkUser(user_order)) {
+                if (user_order.getRemaing_volume() == null) {
+                    user_order.setRemaing_volume(user_order.getVolume());
+                }
                 User_order orderSave = user_orderRepository.save(user_order);
-                user_orderService.updateUserBalance(user_order);
                 return new ResponseEntity<User_order>(orderSave, HttpStatus.CREATED);
             }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "stock_name or stock_symbol doesnt match with given id_stock  ");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Inexistent id or insuficient balance or insuficient volume for stockSell");
+
         }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inexistent id or insuficient balance or insuficient volume for stockSell");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "stock_name or stock_symbol doesnt match with given id_stock  ");
+
     }
     // metodo para ask min
     // metodo para ask max
     // metodo para bid min
     // metodo para bid max
 
-    //listando ordens de compra
-    
+    // listando ordens de compra
 
 }
