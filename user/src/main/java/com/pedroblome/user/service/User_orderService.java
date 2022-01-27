@@ -10,17 +10,20 @@ import com.pedroblome.user.model.User;
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.model.User_stock_balance;
 import com.pedroblome.user.repository.UserRepository;
+import com.pedroblome.user.repository.User_orderRepository;
 import com.pedroblome.user.repository.User_stock_balanceRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 //import reactor.core.publisher.Mono;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class User_orderService {
@@ -30,6 +33,9 @@ public class User_orderService {
 
   @Autowired
   private User_stock_balanceRepository user_stock_balanceRepository;
+
+  @Autowired
+  private User_orderRepository user_orderRepository;
 
   // verifica usuario
   public boolean checkUser(@RequestBody User_order user_order) {
@@ -59,7 +65,6 @@ public class User_orderService {
     }
     return false;
   }
-  
 
   public Boolean checkStock(Stockdto stockdto) {
     try {
@@ -89,6 +94,29 @@ public class User_orderService {
     }
 
     return false;
+  }
+
+  public ResponseEntity<?> addOrder(User_order user_order) {
+
+    Stockdto stockdto = new Stockdto(user_order.getId_stock(),
+        user_order.getStock_name(),
+        user_order.getStock_symbol());
+    if (checkStock(stockdto)) {
+      if (checkUser(user_order)) {
+        if (user_order.getRemaing_volume() == null) {
+          user_order.setRemaing_volume(user_order.getVolume());
+        }
+        User_order orderSave = user_orderRepository.save(user_order);
+        return ResponseEntity.ok().body(orderSave);
+
+      }
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Inexistent id or insuficient balance or insuficient volume for stockSell");
+
+    }
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+        "stock_name or stock_symbol doesnt match with given id_stock  ");
+
   }
 
   // update dollar ballance
