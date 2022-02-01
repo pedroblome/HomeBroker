@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,6 +56,7 @@ public class User_stock_balanceController {
         return new ResponseEntity<User_stock_balance>(stock, HttpStatus.CREATED);
 
     }
+    
 
     public ObjectMapper configureDeserializerDate() {
         // THIS FUNCTION CONFIGURE DESERIALIZER TO GET THE CORRECT DATE FROM RESPONSE

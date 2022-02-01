@@ -1,5 +1,6 @@
 package com.pedroblome.user.controller;
 
+import java.io.Console;
 import java.util.List;
 
 import com.pedroblome.user.model.User_order;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,8 +32,9 @@ public class User_orderController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> saveOrder(@RequestBody User_order user_order) {
-        return user_orderService.addOrder(user_order);
+    public ResponseEntity<?> saveOrder(@RequestHeader("Authorization") String token,
+            @RequestBody User_order user_order) {
+        return user_orderService.addOrder(user_order, token);
     }
 
 }

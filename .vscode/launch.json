@@ -29,6 +29,16 @@
             "mainClass": "com.pedroblome.stocks.StockApplication",
             "projectName": "stocks",
             "args": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-StockApplication<user>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.pedroblome.user.StockApplication",
+            "projectName": "user",
+            "args": ""
         }
     ]
 }

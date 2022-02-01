@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  apiUser:
+    image: "apiuser:v1"
+    ports:
+      - 8088:8088
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/postgres
+    restart: always
+
+  apiStock:
+    image: "apistock:v1"
+    ports:
+      - 8089:8089
+    environment:
+      DB_URL: jdbc:postgresql://database:5432/stocks
+    restart: always
+
+  database:
+    image: "postgres:latest"
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: stocks
+    volumes:
+      - /var/usr/lib/postgresql/14/main
+
+    restart: always

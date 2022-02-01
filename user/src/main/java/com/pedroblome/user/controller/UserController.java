@@ -36,14 +36,14 @@ public class UserController {
     public Optional<User> searchStock(@PathVariable Long id) {
         return userRepository.findById(id);
     }
-
+  
     @PostMapping
-    public ResponseEntity<User> add(@RequestBody User user) {
-        User useradd = userRepository.save(user);
-        return new ResponseEntity<User>(useradd,HttpStatus.CREATED);
-
+    public ResponseEntity<?> add(@RequestBody User user){
+        User addUser = userRepository.save(user);
+        return new ResponseEntity<User>(addUser, HttpStatus.CREATED);
     }
-
+ 
+    
     @DeleteMapping(value = "/{id}")
     public void deleteUser(@PathVariable Long id) throws Exception {
         userRepository.deleteById(id);

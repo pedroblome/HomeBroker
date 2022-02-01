@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +37,8 @@ public class StockController {
         }
 
     }
-    //verify the user_order BUY SELL
+
+    // verify the user_order BUY SELL
     @PostMapping(value = "/dto/{id}")
     public boolean dtoStock(@RequestBody StockRetornodto stockRetornodto) {
         Stock stock = stockRepository.findById(stockRetornodto.getId()).get();
@@ -44,6 +48,28 @@ public class StockController {
 
         }
         return false;
+
+    }
+
+    @PutMapping("/{id}")
+    public Stock replaceStock(@RequestBody Stock newStock, @PathVariable Long id) {
+
+        return stockRepository.findById(id)
+                .map(stock -> {
+                    stock.setAsk_max(newStock.getAsk_max().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getAsk_max()
+                            : stock.getAsk_max());
+                    stock.setAsk_min(newStock.getAsk_min().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getAsk_min()
+                            : stock.getAsk_min());
+                    stock.setBid_max(newStock.getBid_max().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getBid_max()
+                            : stock.getBid_max());
+                    stock.setBid_min(newStock.getBid_min().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getBid_min()
+                            : stock.getBid_min());
+                    return stockRepository.save(stock);
+
+                }).orElseGet(() -> {
+                    newStock.setId(id);
+                    return stockRepository.save(newStock);
+                });
 
     }
 
