@@ -6,8 +6,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.pedroblome.user.Aux.ask;
-import com.pedroblome.user.Aux.bid;
+
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.model.User_stock_balance;
@@ -40,84 +39,102 @@ public class User_orderService {
   @Autowired
   private User_orderRepository user_orderRepository;
 
-  private Object put;
-
   // verifica usuario
 
   public ResponseEntity<?> addOrder(User_order user_order, String token) {
-    Stockdto stockdto = new Stockdto(user_order.getId(), user_order.getStock_name(), user_order.getStock_symbol());
-    if (checkUser(user_order)) {
-      if (checkStock(stockdto, token)) {
-        user_orderRepository.save(user_order);
-        // user_stock_balanceRepository.volume(user_order.getId_user(),user_order.getId_stock()).setVolume();
+    Stockdto stockdto = new Stockdto(user_order.getId_stock(),
+        user_order.getStock_name(),
+        user_order.getStock_symbol());
 
-        try {
-          var bid = new bid();
-          var ask = new ask();
-    
-          RestTemplate template = new RestTemplate();
-          URI uri;
-          uri = new URI("http://localhost:8089/stocks" + user_order.getId_stock());
-          HttpHeaders headers = new HttpHeaders();
-          headers.set("Authorization", token);
-          headers.set("Content-Type", "application/json");
-    
-          Map<String, Long> param = new HashMap<String, Long>();
-          param.put("id", user_order.getId_stock());
-    
-          JSONObject jsonObject = new JSONObject();
-    
-          jsonObject.put("id", user_order.getId_stock());
-          jsonObject.put("ask_min", ask.AskMin(user_order.getPrice(),
-              user_order.getId_stock(), user_orderRepository));
-          jsonObject.put("ask_max", ask.AskMax(user_order.getPrice(),
-              user_order.getId_stock(), user_orderRepository));
-          jsonObject.put("bid_min", bid.BidMin(user_order.getPrice(),
-              user_order.getId_stock(), user_orderRepository));
-          jsonObject.put("bid_max", bid.BidMax(user_order.getPrice(),
-              user_order.getId_stock(), user_orderRepository));
-    
-          HttpEntity<String> request = new HttpEntity<String>(jsonObject.toString(),
-              headers);
-          System.out.println(jsonObject.toString());
-          HttpEntity<String> response = template.exchange(uri.toString(),
-              HttpMethod.PUT, request, String.class, param);
-    
+    if (user_order.getType() == 1 || user_order.getType() == 0) {
+      if (user_order.getStatus() == 1) {
+        if (checkUser(user_order)) {
+          if (checkStock(stockdto, token)) {
+            user_order.setRemaing_volume(user_order.getVolume());
+            if (user_order.getType() == 0) {
+              int volumeUpdate = user_stock_balanceRepository
+                  .findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                  .getVolume() - user_order.getVolume();
+              user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                  .setVolume(volumeUpdate);
+            }
+            System.out.println("askmax: "+user_orderRepository.askMax(user_order.getId_stock()));
+            System.out.println("asmin: "+user_orderRepository.askMin(user_order.getId_stock()));
+            System.out.println("bidmax: "+user_orderRepository.bidMax(user_order.getId_stock()));
+            System.out.println("bidmin: "+user_orderRepository.bidMin(user_order.getId_stock()));
+
+            User_order orderSave = user_orderRepository.save(user_order);
+            return ResponseEntity.ok().body(orderSave);
+            // criação do update Ask Bid para apiStock
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+
+          }
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "stock_name or stock_symbol doesnt match with given id_stock!!");
         }
-    
-        catch (URISyntaxException e) {
-          e.printStackTrace();
-        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "Inexistent id or insuficient balance or insuficient volume for stockSell!!");
 
       }
-
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot create order with status diferent of 1!!");
     }
-
-    // put de bid e ask
-
-    return ResponseEntity.ok().body(user_order);
-
+    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+        "Cannot create order with type diferent of 1 or 0!!");
   }
 
   public boolean checkUser(@RequestBody User_order user_order) {
-    int volume = user_stock_balanceRepository.volume(user_order.getId_user(), user_order.getId_stock()).getVolume();
 
     if (userRepository.existsById(user_order.getId_user())) {
       if (user_order.getType() == 1) {
         return true;
       }
-      if (user_order.getType() == 0 && volume >= user_order.getVolume()) {
-        return true;
+      if (user_order.getType() == 0) {
+        try {
+          Integer volume = user_stock_balanceRepository.volume(user_order.getId_user(), user_order.getId_stock())
+              .getVolume();
+          if (volume != null && volume >= user_order.getVolume()) {
+            return true;
+          }
+          return false;
 
+        } catch (NullPointerException e) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "User doesnt have enoug of this stock to sell!");
+        }
       }
-      return false;
 
     }
-
-    // new ResponseStatusException(HttpStatus.BAD_REQUEST,
-    // "type of order is invalid!!");
     return false;
-
   }
 
   public Boolean checkStock(Stockdto stockdto, String token) {
@@ -129,8 +146,8 @@ public class User_orderService {
 
       // CABEÇALHO
       HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      headers.add("Authorization", token);
+      headers.set("Content-Type", "application/json");
+      headers.set("Authorization", token);
 
       // (instancia,cabecalho)
       HttpEntity requestEntity = new HttpEntity(stockdto, headers);
@@ -143,10 +160,11 @@ public class User_orderService {
           Boolean.class);
       return response.getBody();
     } catch (URISyntaxException e) {
-
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    return false;
 
-    return true;
   }
+
 }

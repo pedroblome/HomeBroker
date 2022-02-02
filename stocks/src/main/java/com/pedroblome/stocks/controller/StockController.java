@@ -56,14 +56,10 @@ public class StockController {
 
         return stockRepository.findById(id)
                 .map(stock -> {
-                    stock.setAsk_max(newStock.getAsk_max().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getAsk_max()
-                            : stock.getAsk_max());
-                    stock.setAsk_min(newStock.getAsk_min().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getAsk_min()
-                            : stock.getAsk_min());
-                    stock.setBid_max(newStock.getBid_max().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getBid_max()
-                            : stock.getBid_max());
-                    stock.setBid_min(newStock.getBid_min().compareTo(BigDecimal.valueOf(0)) != 0 ? newStock.getBid_min()
-                            : stock.getBid_min());
+                    stock.setAsk_max(newStock.getAsk_max().compareTo(null) ==0 ? newStock.getAsk_max() : stock.getAsk_max());
+                    stock.setAsk_min(newStock.getAsk_min().compareTo(null) ==0 ? newStock.getAsk_min() : stock.getAsk_min());
+                    stock.setBid_max(newStock.getBid_max().compareTo(null) ==0 ? newStock.getBid_max() : stock.getBid_max());
+                    stock.setBid_min(newStock.getBid_min().compareTo(null) ==0 ? newStock.getBid_min() : stock.getBid_min());
                     return stockRepository.save(stock);
 
                 }).orElseGet(() -> {

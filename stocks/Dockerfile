@@ -6,4 +6,5 @@ COPY src src
 RUN mvn package -DskipTests
 FROM openjdk:17
 COPY --from=build /app/target/stocks-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 8089
 ENTRYPOINT java -jar -Djava.security.egd=file:/dev/./urandom -jar -XX:MinRAMPercentage=70 -XX:MaxRAMPercentage=90 -server -XX:+OptimizeStringConcat -XX:+UseStringDeduplication /app.jar
