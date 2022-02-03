@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.model.User_stock_balance;
@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class User_orderService {
+
 
   @Autowired
   private UserRepository userRepository;
@@ -58,45 +59,72 @@ public class User_orderService {
               user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
                   .setVolume(volumeUpdate);
             }
-            System.out.println("askmax: "+user_orderRepository.askMax(user_order.getId_stock()));
-            System.out.println("asmin: "+user_orderRepository.askMin(user_order.getId_stock()));
-            System.out.println("bidmax: "+user_orderRepository.bidMax(user_order.getId_stock()));
-            System.out.println("bidmin: "+user_orderRepository.bidMin(user_order.getId_stock()));
 
+            // criando o dto e a conexao
+            try {
+              BigDecimal askmax = user_orderRepository.askMax(user_order.getId_stock());
+              BigDecimal askmin = user_orderRepository.askMin(user_order.getId_stock());
+              BigDecimal bidmax = user_orderRepository.bidMax(user_order.getId_stock());
+              BigDecimal bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+              StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), askmin, askmax, bidmin, bidmax,
+                  user_order.getUpdated_on());
+              System.out.println("---------------------------------");
+              System.out.println(updateStock);
+              RestTemplate restTemplate = new RestTemplate();
+              URI uri;
+              uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
+              HttpHeaders headers = new HttpHeaders();
+              headers.set("Authorization", token);
+              headers.set("Content-Type", "application/json");
+
+              // (instancia,cabecalho)
+              HttpEntity requestEntity = new HttpEntity(updateStock, headers);
+
+              // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+              ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
+                  uri,
+                  HttpMethod.PUT,
+                  requestEntity,
+                  StockAskBidDto.class);
+
+            } catch (URISyntaxException e) {
+              System.out.println("deu erro");
+              e.printStackTrace();
+            }
+
+            //
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
+            // .
             User_order orderSave = user_orderRepository.save(user_order);
             return ResponseEntity.ok().body(orderSave);
-            // criação do update Ask Bid para apiStock
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-
           }
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               "stock_name or stock_symbol doesnt match with given id_stock!!");

@@ -1,10 +1,10 @@
-package com.pedroblome.user.controller.dto;
+package com.pedroblome.stocks.controller.dto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class StockAskBidDto {
+public class StockDto {
     private long id;
     private BigDecimal ask_min;
     private BigDecimal ask_max;
@@ -12,17 +12,14 @@ public class StockAskBidDto {
     private BigDecimal bid_max;
     private Timestamp updated_on;
 
-    public StockAskBidDto(long id, BigDecimal ask_min, BigDecimal ask_max, BigDecimal bid_min, BigDecimal bid_max,
+    public StockDto(long id, BigDecimal ask_min, BigDecimal ask_max, BigDecimal bid_min, BigDecimal bid_max,
             Timestamp updated_on) {
         this.id = id;
         this.ask_min = ask_min;
         this.ask_max = ask_max;
         this.bid_min = bid_min;
         this.bid_max = bid_max;
-        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
-    }
-    public StockAskBidDto(){
-        
+        this.updated_on = updated_on;
     }
 
     public long getId() {
@@ -75,8 +72,8 @@ public class StockAskBidDto {
 
     @Override
     public String toString() {
-        return "StockAskBidDto [ask_max=" + ask_max + ", ask_min=" + ask_min + ", bid_max=" + bid_max + ", bid_min="
-                + bid_min + ", id=" + id + ", updated_on=" + updated_on + "]";
+        return "StockDto [ask_max=" + ask_max + ", ask_min=" + ask_min + ", bid_max=" + bid_max + ", bid_min=" + bid_min
+                + ", id=" + id + ", updated_on=" + updated_on + "]";
     }
 
 }
