@@ -3,24 +3,20 @@ package com.pedroblome.user.service;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
-import com.pedroblome.user.model.User_stock_balance;
 import com.pedroblome.user.repository.UserRepository;
 import com.pedroblome.user.repository.User_orderRepository;
 import com.pedroblome.user.repository.User_stock_balanceRepository;
 
-import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +25,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class User_orderService {
-
 
   @Autowired
   private UserRepository userRepository;
@@ -62,14 +57,17 @@ public class User_orderService {
 
             // criando o dto e a conexao
             try {
-              BigDecimal askmax = user_orderRepository.askMax(user_order.getId_stock());
-              BigDecimal askmin = user_orderRepository.askMin(user_order.getId_stock());
-              BigDecimal bidmax = user_orderRepository.bidMax(user_order.getId_stock());
-              BigDecimal bidmin = user_orderRepository.bidMin(user_order.getId_stock());
-              StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), askmin, askmax, bidmin, bidmax,
-                  user_order.getUpdated_on());
+
+              StockAskBidDto newAskBid = this.checkAskBid(user_order);
+
+              // novo price maior que askMax
+              // retornar os askmin, askmax, bidmin, bidmax. dado um certo user_order
+              // StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), ,
+              // askmax, bidmin, bidmax,
+              // user_order.getUpdated_on());
+
               System.out.println("---------------------------------");
-              System.out.println(updateStock);
+              System.out.println(newAskBid);
               RestTemplate restTemplate = new RestTemplate();
               URI uri;
               uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
@@ -78,7 +76,7 @@ public class User_orderService {
               headers.set("Content-Type", "application/json");
 
               // (instancia,cabecalho)
-              HttpEntity requestEntity = new HttpEntity(updateStock, headers);
+              HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
 
               // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
               ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
@@ -92,37 +90,7 @@ public class User_orderService {
               e.printStackTrace();
             }
 
-            //
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
-            // .
+            matchOrder(user_order);
             User_order orderSave = user_orderRepository.save(user_order);
             return ResponseEntity.ok().body(orderSave);
           }
@@ -167,6 +135,7 @@ public class User_orderService {
 
   public Boolean checkStock(Stockdto stockdto, String token) {
     try {
+
       // URL DESTINO
       RestTemplate restTemplate = new RestTemplate();
       URI uri;
@@ -195,4 +164,195 @@ public class User_orderService {
 
   }
 
+  public ResponseEntity<?> matchOrder(@RequestBody User_order user_order) {
+    System.out.println("-------------------------------");
+    System.out.println("esta chegando ao metodo matchOrder");
+
+    List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(),
+        user_order.getId_user());
+    List<User_order> orderBuy = user_orderRepository.listBuy(user_order.getId_stock(),
+        user_order.getId_user());
+
+    System.out.println("order buy ============================= " + orderBuy.size());
+
+    System.out.println("order buy ============================= " + orderSell.size());
+
+    if (user_order.getType() == 1) {// percorras as listas de vendas
+      for (User_order sellOrders : orderSell) {
+        System.out.println(sellOrders.getPrice());
+        // valor a ser subtradio de cada ordem ===> menor quantidade de volume entre as
+        // duas ordens que se envolveram no match.
+        Integer listVolume = sellOrders.getRemaing_volume();
+        Integer orderVolume = user_order.getRemaing_volume();
+
+        //dolar Ballance do dono de cada order envolvida
+        BigDecimal dollarUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
+        BigDecimal dollarList = userRepository.getById(sellOrders.getId_user()).getDollar_balance();
+
+        
+
+        Integer setVolume;
+        if (listVolume >= orderVolume) {
+          setVolume = orderVolume;
+        } else {
+          setVolume = listVolume;
+        }
+        Integer updateVolumeStock = user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume ;
+          //preço total da Ordem.
+          BigDecimal totalValue = sellOrders.getPrice().multiply(new BigDecimal(setVolume));
+
+
+        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0) {
+          System.out.println("reconhece que e mnor");
+          user_order.setRemaing_volume(user_order.getRemaing_volume()- setVolume);
+          sellOrders.setRemaing_volume(sellOrders.getRemaing_volume()-setVolume);
+
+          //fechando ordem se acabar o volume
+          if(user_order.getRemaing_volume()==0){
+            user_order.closeOrder();
+          }if(sellOrders.getRemaing_volume()==0){
+            sellOrders.closeOrder();
+          }
+          //att o dollar dos dois envolvidos
+          userRepository.getById(user_order.getId_user()).setDollar_balance(dollarUser.subtract(totalValue));
+          userRepository.getById(sellOrders.getId_user()).setDollar_balance(dollarList.add(totalValue));
+          
+
+          //set status desativando a order a qual remaingVolume = 0;
+          if(user_order.getRemaing_volume()==0){
+            user_order.setStatus(0);
+          }
+          if(sellOrders.getRemaing_volume()==0){
+            sellOrders.setStatus(0);
+          }
+
+          //att o stockBallance do comprador.
+          if(user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()) !=null){
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()).setVolume(updateVolumeStock);
+
+          }
+
+
+
+        }
+        else{
+          System.out.println("ordem cadastrada nao rendeu nenhum match");
+        }
+
+      }
+    }
+    if (user_order.getType() == 0) {// percorras as listas de compras.
+      for (User_order buyOrder : orderBuy) {
+        System.out.println(buyOrder.getPrice());
+        Integer volume1 = user_order.getRemaing_volume() -
+            buyOrder.getRemaing_volume();
+        Integer volume2 = buyOrder.getRemaing_volume() -
+            user_order.getRemaing_volume();
+
+        if (user_order.getPrice().compareTo(buyOrder.getPrice()) >= 0 && buyOrder.getRemaing_volume() > 0) {
+          if (user_order.getRemaing_volume() > buyOrder.getRemaing_volume()) {
+
+            user_order.setRemaing_volume(volume1);
+            buyOrder.setRemaing_volume(volume1);
+          }
+          if (buyOrder.getRemaing_volume() >= user_order.getRemaing_volume() && buyOrder.getRemaing_volume() > 0) {
+
+            user_order.setRemaing_volume(volume2);
+            buyOrder.setRemaing_volume(volume2);
+          }
+        }
+
+      }
+
+    }
+    User_order orderMatch = user_orderRepository.save(user_order);
+    return ResponseEntity.ok().body(orderMatch);
+
+  }
+
+  public void updateStockBalance(@RequestBody User_order user_order) {
+
+  }
+
+  public StockAskBidDto checkAskBid(@RequestBody User_order user_order) {
+
+    BigDecimal askmin = null;
+    BigDecimal askmax = null;
+    BigDecimal bidmin = null;
+    BigDecimal bidmax = null;
+
+    // ordem de compra
+    if (user_order.getType() == 1) { // atualizar valores de bid min e bid max
+      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
+
+        // vendo se substirui o bidmax presente no banco
+        if (user_order.getPrice().compareTo(user_orderRepository.bidMax(user_order.getId_stock())) == 1) {
+          bidmax = user_order.getPrice();
+          if (user_order.getPrice().compareTo(user_orderRepository.bidMin(user_order.getId_stock())) == -1) {
+            bidmin = user_order.getPrice();
+          } else {
+            bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+          }
+
+        } else {
+          bidmax = user_orderRepository.bidMax(user_order.getId_stock());
+          if (user_order.getPrice().compareTo(user_orderRepository.bidMin(user_order.getId_stock())) == -1) {
+            bidmin = user_order.getPrice();
+          } else {
+            bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+          }
+        }
+
+      } else {
+        System.out.println("nao tem order para essa stock cadastrada");
+        bidmax = user_order.getPrice();
+        bidmin = user_order.getPrice();
+
+      }
+      if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
+        askmax = user_orderRepository.askMax(user_order.getId_stock());
+        askmin = user_orderRepository.askMin(user_order.getId_stock());
+
+      }
+
+    }
+    if (user_order.getType() == 0) { // atualizar valores de bid min e bid max
+      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
+
+        // vendo se substirui o bidmax presente no banco
+        if (user_order.getPrice().compareTo(user_orderRepository.askMax(user_order.getId_stock())) == 1) {
+          askmax = user_order.getPrice();
+          if (user_order.getPrice().compareTo(user_orderRepository.askMin(user_order.getId_stock())) == -1) {
+            askmin = user_order.getPrice();
+          } else {
+            askmin = user_orderRepository.askMin(user_order.getId_stock());
+          }
+
+        } else {
+          askmax = user_orderRepository.askMax(user_order.getId_stock());
+          if (user_order.getPrice().compareTo(user_orderRepository.askMin(user_order.getId_stock())) == -1) {
+            askmin = user_order.getPrice();
+          } else {
+            askmin = user_orderRepository.askMin(user_order.getId_stock());
+          }
+        }
+
+      } else {
+        System.out.println("nao tem order para essa stock cadastrada");
+        askmax = user_order.getPrice();
+        askmin = user_order.getPrice();
+
+      }
+      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
+        bidmax = user_orderRepository.bidMax(user_order.getId_stock());
+        bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+
+      }
+    }
+
+    StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), askmin, askmax, bidmin, bidmax,
+        user_order.getUpdated_on());
+    return updateStock;
+
+  }
 }

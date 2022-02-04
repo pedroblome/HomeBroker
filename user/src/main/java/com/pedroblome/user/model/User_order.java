@@ -127,6 +127,16 @@ public class User_order {
         this.volume = volume;
     }
 
+    public void subractRemaingVolume(){
+        this.remaing_volume  -= remaing_volume;
+    }
+    public void addRemaingVolume(){
+        this.remaing_volume += remaing_volume;
+    }
+
+    public void closeOrder(){
+        this.status=0;
+    }
     public User_order() {
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
