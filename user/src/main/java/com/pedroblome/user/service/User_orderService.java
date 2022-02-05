@@ -3,6 +3,8 @@ package com.pedroblome.user.service;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.pedroblome.user.controller.dto.StockAskBidDto;
@@ -38,6 +40,10 @@ public class User_orderService {
   // verifica usuario
 
   public ResponseEntity<?> addOrder(User_order user_order, String token) {
+
+    LocalDateTime now = LocalDateTime.now();
+    Timestamp timestamp = Timestamp.valueOf(now);
+
     Stockdto stockdto = new Stockdto(user_order.getId_stock(),
         user_order.getStock_name(),
         user_order.getStock_symbol());
@@ -53,21 +59,15 @@ public class User_orderService {
                   .getVolume() - user_order.getVolume();
               user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
                   .setVolume(volumeUpdate);
+              user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                  .setUpdated_on(timestamp);
+
             }
 
             // criando o dto e a conexao
             try {
 
               StockAskBidDto newAskBid = this.checkAskBid(user_order);
-
-              // novo price maior que askMax
-              // retornar os askmin, askmax, bidmin, bidmax. dado um certo user_order
-              // StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), ,
-              // askmax, bidmin, bidmax,
-              // user_order.getUpdated_on());
-
-              System.out.println("---------------------------------");
-              System.out.println(newAskBid);
               RestTemplate restTemplate = new RestTemplate();
               URI uri;
               uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
@@ -86,7 +86,6 @@ public class User_orderService {
                   StockAskBidDto.class);
 
             } catch (URISyntaxException e) {
-              System.out.println("deu erro");
               e.printStackTrace();
             }
 
@@ -165,31 +164,22 @@ public class User_orderService {
   }
 
   public ResponseEntity<?> matchOrder(@RequestBody User_order user_order) {
-    System.out.println("-------------------------------");
-    System.out.println("esta chegando ao metodo matchOrder");
 
     List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(),
         user_order.getId_user());
     List<User_order> orderBuy = user_orderRepository.listBuy(user_order.getId_stock(),
         user_order.getId_user());
 
-    System.out.println("order buy ============================= " + orderBuy.size());
-
-    System.out.println("order buy ============================= " + orderSell.size());
-
     if (user_order.getType() == 1) {// percorras as listas de vendas
       for (User_order sellOrders : orderSell) {
-        System.out.println(sellOrders.getPrice());
         // valor a ser subtradio de cada ordem ===> menor quantidade de volume entre as
         // duas ordens que se envolveram no match.
         Integer listVolume = sellOrders.getRemaing_volume();
         Integer orderVolume = user_order.getRemaing_volume();
 
-        //dolar Ballance do dono de cada order envolvida
+        // dolar Ballance do dono de cada order envolvida
         BigDecimal dollarUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
         BigDecimal dollarList = userRepository.getById(sellOrders.getId_user()).getDollar_balance();
-
-        
 
         Integer setVolume;
         if (listVolume >= orderVolume) {
@@ -197,45 +187,51 @@ public class User_orderService {
         } else {
           setVolume = listVolume;
         }
-        Integer updateVolumeStock = user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume ;
-          //preço total da Ordem.
-          BigDecimal totalValue = sellOrders.getPrice().multiply(new BigDecimal(setVolume));
+ 
+        // preço total da Ordem.
+        BigDecimal totalValue = sellOrders.getPrice().multiply(new BigDecimal(setVolume));
 
+        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0 && sellOrders.getPrice().compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance())<=0) {
+          user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
+          sellOrders.setRemaing_volume(sellOrders.getRemaing_volume() - setVolume);
 
-        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0) {
-          System.out.println("reconhece que e mnor");
-          user_order.setRemaing_volume(user_order.getRemaing_volume()- setVolume);
-          sellOrders.setRemaing_volume(sellOrders.getRemaing_volume()-setVolume);
-
-          //fechando ordem se acabar o volume
-          if(user_order.getRemaing_volume()==0){
+          // fechando ordem se acabar o volume
+          if (user_order.getRemaing_volume() == 0) {
             user_order.closeOrder();
-          }if(sellOrders.getRemaing_volume()==0){
+          }
+          if (sellOrders.getRemaing_volume() == 0) {
             sellOrders.closeOrder();
           }
-          //att o dollar dos dois envolvidos
+          // att o dollar dos dois envolvidos
           userRepository.getById(user_order.getId_user()).setDollar_balance(dollarUser.subtract(totalValue));
           userRepository.getById(sellOrders.getId_user()).setDollar_balance(dollarList.add(totalValue));
-          
 
-          //set status desativando a order a qual remaingVolume = 0;
-          if(user_order.getRemaing_volume()==0){
-            user_order.setStatus(0);
+          LocalDateTime now = LocalDateTime.now();
+          Timestamp timestamp = Timestamp.valueOf(now);
+
+          // att o updated on em cada um dos envovlidos
+          user_order.setUpdated_on(timestamp);
+          sellOrders.setUpdated_on(timestamp);
+          userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
+          userRepository.getById(sellOrders.getId_user()).setUpdated_on(timestamp);
+
+          // att o stockBallance do comprador.
+
+          try {
+            Integer updateVolumeStock = user_stock_balanceRepository
+            .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
+
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                .setVolume(updateVolumeStock);
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                .setVolume(updateVolumeStock);
+          } catch (NullPointerException e) {
+            user_stock_balanceRepository.createStockBalance(user_order.getId_stock(), user_order.getId_user(),
+                user_order.getUpdated_on(),
+                user_order.getStock_name(), user_order.getStock_symbol(), user_order.getUpdated_on(), setVolume);
           }
-          if(sellOrders.getRemaing_volume()==0){
-            sellOrders.setStatus(0);
-          }
 
-          //att o stockBallance do comprador.
-          if(user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()) !=null){
-            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()).setVolume(updateVolumeStock);
-
-          }
-
-
-
-        }
-        else{
+        } else {
           System.out.println("ordem cadastrada nao rendeu nenhum match");
         }
 
@@ -243,27 +239,63 @@ public class User_orderService {
     }
     if (user_order.getType() == 0) {// percorras as listas de compras.
       for (User_order buyOrder : orderBuy) {
-        System.out.println(buyOrder.getPrice());
-        Integer volume1 = user_order.getRemaing_volume() -
-            buyOrder.getRemaing_volume();
-        Integer volume2 = buyOrder.getRemaing_volume() -
-            user_order.getRemaing_volume();
+        Integer listVolume = buyOrder.getRemaing_volume();
+        Integer orderVolume = user_order.getRemaing_volume();
 
-        if (user_order.getPrice().compareTo(buyOrder.getPrice()) >= 0 && buyOrder.getRemaing_volume() > 0) {
-          if (user_order.getRemaing_volume() > buyOrder.getRemaing_volume()) {
+        // dolar Ballance do dono de cada order envolvida
+        BigDecimal dollarUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
+        BigDecimal dollarList = userRepository.getById(buyOrder.getId_user()).getDollar_balance();
 
-            user_order.setRemaing_volume(volume1);
-            buyOrder.setRemaing_volume(volume1);
+        Integer setVolume;
+        if (listVolume >= orderVolume) {
+          setVolume = orderVolume;
+        } else {
+          setVolume = listVolume;
+        }
+        Integer updateVolumeStock = user_stock_balanceRepository
+            .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
+        // preço total da Ordem.
+        BigDecimal totalValue = buyOrder.getPrice().multiply(new BigDecimal(setVolume));
+
+        if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0 && user_order.getPrice().compareTo(userRepository.getById(buyOrder.getId_user()).getDollar_balance())<=0) {
+
+          user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
+          buyOrder.setRemaing_volume(buyOrder.getRemaing_volume() - setVolume);
+
+          // fechando ordem se acabar o volume
+          if (user_order.getRemaing_volume() == 0) {
+            user_order.closeOrder();
           }
-          if (buyOrder.getRemaing_volume() >= user_order.getRemaing_volume() && buyOrder.getRemaing_volume() > 0) {
-
-            user_order.setRemaing_volume(volume2);
-            buyOrder.setRemaing_volume(volume2);
+          if (buyOrder.getRemaing_volume() == 0) {
+            buyOrder.closeOrder();
           }
+          // att o dollar dos dois envolvidos
+          userRepository.getById(user_order.getId_user()).setDollar_balance(dollarUser.add(totalValue));
+          userRepository.getById(buyOrder.getId_user()).setDollar_balance(dollarList.subtract(totalValue));
+
+          LocalDateTime now = LocalDateTime.now();
+          Timestamp timestamp = Timestamp.valueOf(now);
+
+          // att o updated on em cada um dos envovlidos
+          user_order.setUpdated_on(timestamp);
+          buyOrder.setUpdated_on(timestamp);
+
+          // att o stockBallance do comprador.
+          try {
+            user_stock_balanceRepository.findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock())
+                .setVolume(updateVolumeStock);
+          } catch (NullPointerException e) {
+            user_stock_balanceRepository.createStockBalance(buyOrder.getId_stock(), buyOrder.getId_user(),
+                buyOrder.getUpdated_on(),
+                buyOrder.getStock_name(), buyOrder.getStock_symbol(), buyOrder.getUpdated_on(), setVolume);
+
+          }
+
+        } else {
+          System.out.println("ordem cadastrada nao rendeu nenhum match");
         }
 
       }
-
     }
     User_order orderMatch = user_orderRepository.save(user_order);
     return ResponseEntity.ok().body(orderMatch);
@@ -304,7 +336,7 @@ public class User_orderService {
         }
 
       } else {
-        System.out.println("nao tem order para essa stock cadastrada");
+
         bidmax = user_order.getPrice();
         bidmin = user_order.getPrice();
 
@@ -317,7 +349,7 @@ public class User_orderService {
 
     }
     if (user_order.getType() == 0) { // atualizar valores de bid min e bid max
-      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
+      if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
 
         // vendo se substirui o bidmax presente no banco
         if (user_order.getPrice().compareTo(user_orderRepository.askMax(user_order.getId_stock())) == 1) {
@@ -338,7 +370,7 @@ public class User_orderService {
         }
 
       } else {
-        System.out.println("nao tem order para essa stock cadastrada");
+
         askmax = user_order.getPrice();
         askmin = user_order.getPrice();
 

@@ -118,6 +118,7 @@ public class User_order {
     public void setUpdated_on(Timestamp updated_on) {
         this.updated_on = updated_on;
     }
+    
 
     public Integer getVolume() {
         return volume;
