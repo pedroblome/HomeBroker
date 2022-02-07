@@ -7,6 +7,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
@@ -14,7 +17,9 @@ import com.pedroblome.user.repository.UserRepository;
 import com.pedroblome.user.repository.User_orderRepository;
 import com.pedroblome.user.repository.User_stock_balanceRepository;
 
+import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -51,51 +57,59 @@ public class User_orderService {
     if (user_order.getType() == 1 || user_order.getType() == 0) {
       if (user_order.getStatus() == 1) {
         if (checkUser(user_order)) {
-          if (checkStock(stockdto, token)) {
-            user_order.setRemaing_volume(user_order.getVolume());
-            if (user_order.getType() == 0) {
-              int volumeUpdate = user_stock_balanceRepository
-                  .findByUserStock(user_order.getId_user(), user_order.getId_stock())
-                  .getVolume() - user_order.getVolume();
-              user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
-                  .setVolume(volumeUpdate);
-              user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
-                  .setUpdated_on(timestamp);
-
+          if(user_order.getPrice().compareTo(BigDecimal.valueOf(0))>0){
+            if (checkStock(stockdto, token)) {
+              
+              user_order.setRemaing_volume(user_order.getVolume());
+              if (user_order.getType() == 0) {
+                int volumeUpdate = user_stock_balanceRepository
+                    .findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                    .getVolume() - user_order.getVolume();
+                user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                    .setVolume(volumeUpdate);
+                user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                    .setUpdated_on(timestamp);
+  
+              }
+  
+              // criando o dto e a conexao
+              try {
+  
+                StockAskBidDto newAskBid = this.checkAskBid(user_order);
+                RestTemplate restTemplate = new RestTemplate();
+                URI uri;
+                uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Authorization", token);
+                headers.set("Content-Type", "application/json");
+  
+                // (instancia,cabecalho)
+                HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
+  
+                // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+                ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    StockAskBidDto.class);
+  
+              } catch (URISyntaxException e) {
+                e.printStackTrace();
+              }
+  
+              matchOrder(user_order);
+              User_order orderSave = user_orderRepository.save(user_order);
+              return ResponseEntity.ok().body(orderSave);
+  
             }
-
-            // criando o dto e a conexao
-            try {
-
-              StockAskBidDto newAskBid = this.checkAskBid(user_order);
-              RestTemplate restTemplate = new RestTemplate();
-              URI uri;
-              uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
-              HttpHeaders headers = new HttpHeaders();
-              headers.set("Authorization", token);
-              headers.set("Content-Type", "application/json");
-
-              // (instancia,cabecalho)
-              HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
-
-              // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-              ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
-                  uri,
-                  HttpMethod.PUT,
-                  requestEntity,
-                  StockAskBidDto.class);
-
-            } catch (URISyntaxException e) {
-              e.printStackTrace();
-            }
-
-            matchOrder(user_order);
-            User_order orderSave = user_orderRepository.save(user_order);
-            return ResponseEntity.ok().body(orderSave);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "stock_name or stock_symbol doesnt match with given id_stock!!");
           }
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              "stock_name or stock_symbol doesnt match with given id_stock!!");
-        }
+                "Price of order must be a number and bigger than 0!!");
+       
+          }
+         
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "Inexistent id or insuficient balance or insuficient volume for stockSell!!");
 
@@ -155,11 +169,14 @@ public class User_orderService {
           requestEntity,
           Boolean.class);
       return response.getBody();
+
     } catch (URISyntaxException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return false;
+    catch(HttpServerErrorException e){
+   e.printStackTrace();
+
+    }    return false;
 
   }
 
@@ -187,11 +204,13 @@ public class User_orderService {
         } else {
           setVolume = listVolume;
         }
- 
+
         // preço total da Ordem.
         BigDecimal totalValue = sellOrders.getPrice().multiply(new BigDecimal(setVolume));
-
-        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0 && sellOrders.getPrice().compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance())<=0) {
+        // verifica se o comprador tem dollar balance >= ao preço total da ordem de
+        // compra feita por ele.
+        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0
+            && totalValue.compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance()) <= 0) {
           user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
           sellOrders.setRemaing_volume(sellOrders.getRemaing_volume() - setVolume);
 
@@ -219,7 +238,7 @@ public class User_orderService {
 
           try {
             Integer updateVolumeStock = user_stock_balanceRepository
-            .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
+                .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
 
             user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
                 .setVolume(updateVolumeStock);
@@ -255,9 +274,10 @@ public class User_orderService {
         Integer updateVolumeStock = user_stock_balanceRepository
             .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
         // preço total da Ordem.
-        BigDecimal totalValue = buyOrder.getPrice().multiply(new BigDecimal(setVolume));
+        BigDecimal totalValue = user_order.getPrice().multiply(new BigDecimal(setVolume));
 
-        if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0 && user_order.getPrice().compareTo(userRepository.getById(buyOrder.getId_user()).getDollar_balance())<=0) {
+        if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0
+            && totalValue.compareTo(userRepository.getById(buyOrder.getId_user()).getDollar_balance()) <= 0) {
 
           user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
           buyOrder.setRemaing_volume(buyOrder.getRemaing_volume() - setVolume);
