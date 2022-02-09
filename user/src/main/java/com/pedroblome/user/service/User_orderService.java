@@ -57,9 +57,9 @@ public class User_orderService {
     if (user_order.getType() == 1 || user_order.getType() == 0) {
       if (user_order.getStatus() == 1) {
         if (checkUser(user_order)) {
-          if(user_order.getPrice().compareTo(BigDecimal.valueOf(0))>0){
+          if (user_order.getPrice().compareTo(BigDecimal.valueOf(0)) > 0) {
             if (checkStock(stockdto, token)) {
-              
+
               user_order.setRemaing_volume(user_order.getVolume());
               if (user_order.getType() == 0) {
                 int volumeUpdate = user_stock_balanceRepository
@@ -69,12 +69,12 @@ public class User_orderService {
                     .setVolume(volumeUpdate);
                 user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
                     .setUpdated_on(timestamp);
-  
+
               }
-  
+
               // criando o dto e a conexao
               try {
-  
+
                 StockAskBidDto newAskBid = this.checkAskBid(user_order);
                 RestTemplate restTemplate = new RestTemplate();
                 URI uri;
@@ -82,34 +82,40 @@ public class User_orderService {
                 HttpHeaders headers = new HttpHeaders();
                 headers.set("Authorization", token);
                 headers.set("Content-Type", "application/json");
-  
+
                 // (instancia,cabecalho)
                 HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
-  
+
                 // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
                 ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
                     uri,
                     HttpMethod.PUT,
                     requestEntity,
                     StockAskBidDto.class);
-  
+
               } catch (URISyntaxException e) {
                 e.printStackTrace();
               }
-  
+              BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
+              BigDecimal newBalance =   userRepository.getById(user_order.getId_user()).getDollar_balance().subtract(totalOrder);
+              
+              if(user_order.getType()==1){
+                userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
+              }
+
               matchOrder(user_order);
               User_order orderSave = user_orderRepository.save(user_order);
               return ResponseEntity.ok().body(orderSave);
-  
+
             }
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "stock_name or stock_symbol doesnt match with given id_stock!!");
           }
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Price of order must be a number and bigger than 0!!");
-       
-          }
-         
+              "Price of order must be a number and bigger than 0!!");
+
+        }
+
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "Inexistent id or insuficient balance or insuficient volume for stockSell!!");
 
@@ -124,8 +130,10 @@ public class User_orderService {
   public boolean checkUser(@RequestBody User_order user_order) {
 
     if (userRepository.existsById(user_order.getId_user())) {
-      if (user_order.getType() == 1) {
+      BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
+      if (user_order.getType() == 1 && totalOrder.compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance())<= 0) {
         return true;
+        
       }
       if (user_order.getType() == 0) {
         try {
@@ -172,11 +180,11 @@ public class User_orderService {
 
     } catch (URISyntaxException e) {
       e.printStackTrace();
-    }
-    catch(HttpServerErrorException e){
-   e.printStackTrace();
+    } catch (HttpServerErrorException e) {
+      e.printStackTrace();
 
-    }    return false;
+    }
+    return false;
 
   }
 
@@ -189,61 +197,62 @@ public class User_orderService {
 
     if (user_order.getType() == 1) {// percorras as listas de vendas
       for (User_order sellOrders : orderSell) {
-        // valor a ser subtradio de cada ordem ===> menor quantidade de volume entre as
-        // duas ordens que se envolveram no match.
-        Integer listVolume = sellOrders.getRemaing_volume();
-        Integer orderVolume = user_order.getRemaing_volume();
-
-        // dolar Ballance do dono de cada order envolvida
-        BigDecimal dollarUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
-        BigDecimal dollarList = userRepository.getById(sellOrders.getId_user()).getDollar_balance();
+        Integer buyerVolume = sellOrders.getRemaing_volume();
+        Integer sellerVolume = user_order.getRemaing_volume();
 
         Integer setVolume;
-        if (listVolume >= orderVolume) {
-          setVolume = orderVolume;
+        if (sellerVolume >= buyerVolume) {
+          setVolume = buyerVolume;
         } else {
-          setVolume = listVolume;
+          setVolume = sellerVolume;
         }
 
-        // preço total da Ordem.
-        BigDecimal totalValue = sellOrders.getPrice().multiply(new BigDecimal(setVolume));
-        // verifica se o comprador tem dollar balance >= ao preço total da ordem de
-        // compra feita por ele.
-        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0
-            && totalValue.compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance()) <= 0) {
+        // dolar Ballance do dono de cada order envolvida
+        BigDecimal dollarBalanceBuyer = userRepository.getById(user_order.getId_user()).getDollar_balance();
+        BigDecimal dollarBalanceSeller = userRepository.getById(sellOrders.getId_user()).getDollar_balance();
+        BigDecimal dollarOrderTotal = sellOrders.getPrice().multiply(BigDecimal.valueOf(setVolume));
+        BigDecimal dollarDiff = user_order.getPrice().subtract(sellOrders.getPrice());
+        BigDecimal newDollarDiff = dollarDiff.multiply(BigDecimal.valueOf(setVolume));
+
+        LocalDateTime now = LocalDateTime.now();
+        Timestamp timestamp = Timestamp.valueOf(now);
+
+        if (sellerVolume >= buyerVolume) {
+          setVolume = buyerVolume;
+        } else {
+          setVolume = sellerVolume;
+        }
+
+        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0) {
+
           user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
           sellOrders.setRemaing_volume(sellOrders.getRemaing_volume() - setVolume);
 
-          // fechando ordem se acabar o volume
           if (user_order.getRemaing_volume() == 0) {
             user_order.closeOrder();
           }
           if (sellOrders.getRemaing_volume() == 0) {
             sellOrders.closeOrder();
           }
-          // att o dollar dos dois envolvidos
-          userRepository.getById(user_order.getId_user()).setDollar_balance(dollarUser.subtract(totalValue));
-          userRepository.getById(sellOrders.getId_user()).setDollar_balance(dollarList.add(totalValue));
-
-          LocalDateTime now = LocalDateTime.now();
-          Timestamp timestamp = Timestamp.valueOf(now);
-
-          // att o updated on em cada um dos envovlidos
+          //att o dollar balance comprador e vendedor.
+          userRepository.getById(sellOrders.getId_user()).setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
+          if(user_order.getPrice().compareTo(sellOrders.getPrice())>= 0){
+              userRepository.getById(user_order.getId_stock()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
+          }
+ 
           user_order.setUpdated_on(timestamp);
           sellOrders.setUpdated_on(timestamp);
           userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
           userRepository.getById(sellOrders.getId_user()).setUpdated_on(timestamp);
 
-          // att o stockBallance do comprador.
-
+          // att o stockBallance do comprador--> user_order
           try {
             Integer updateVolumeStock = user_stock_balanceRepository
                 .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
 
             user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
                 .setVolume(updateVolumeStock);
-            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
-                .setVolume(updateVolumeStock);
+
           } catch (NullPointerException e) {
             user_stock_balanceRepository.createStockBalance(user_order.getId_stock(), user_order.getId_user(),
                 user_order.getUpdated_on(),
@@ -258,52 +267,63 @@ public class User_orderService {
     }
     if (user_order.getType() == 0) {// percorras as listas de compras.
       for (User_order buyOrder : orderBuy) {
-        Integer listVolume = buyOrder.getRemaing_volume();
-        Integer orderVolume = user_order.getRemaing_volume();
-
-        // dolar Ballance do dono de cada order envolvida
-        BigDecimal dollarUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
-        BigDecimal dollarList = userRepository.getById(buyOrder.getId_user()).getDollar_balance();
+        Integer buyerVolume = buyOrder.getRemaing_volume();
+        Integer sellerVolume = user_order.getRemaing_volume();
 
         Integer setVolume;
-        if (listVolume >= orderVolume) {
-          setVolume = orderVolume;
+        if (buyerVolume >= sellerVolume) {
+          setVolume = sellerVolume;
         } else {
-          setVolume = listVolume;
+          setVolume = buyerVolume;
         }
-        Integer updateVolumeStock = user_stock_balanceRepository
-            .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
-        // preço total da Ordem.
-        BigDecimal totalValue = user_order.getPrice().multiply(new BigDecimal(setVolume));
 
-        if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0
-            && totalValue.compareTo(userRepository.getById(buyOrder.getId_user()).getDollar_balance()) <= 0) {
+        // dolar Ballance do dono de cada order envolvida
+        BigDecimal dollarBalanceBuyer = userRepository.getById(buyOrder.getId_user()).getDollar_balance();
+        BigDecimal dollarBalanceSeller = userRepository.getById(user_order.getId_user()).getDollar_balance();
+        BigDecimal dollarOrderTotal = user_order.getPrice().multiply(BigDecimal.valueOf(setVolume));
+        BigDecimal dollarDiff = buyOrder.getPrice().subtract(user_order.getPrice());
+        BigDecimal newDollarDiff = dollarDiff.multiply(BigDecimal.valueOf(setVolume));
+
+        LocalDateTime now = LocalDateTime.now();
+        Timestamp timestamp = Timestamp.valueOf(now);
+
+        
+        if (buyerVolume >= sellerVolume) {
+          setVolume = sellerVolume;
+        } else {
+          setVolume = buyerVolume;
+        }
+
+        if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0) {
 
           user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
           buyOrder.setRemaing_volume(buyOrder.getRemaing_volume() - setVolume);
 
-          // fechando ordem se acabar o volume
           if (user_order.getRemaing_volume() == 0) {
             user_order.closeOrder();
           }
           if (buyOrder.getRemaing_volume() == 0) {
             buyOrder.closeOrder();
           }
-          // att o dollar dos dois envolvidos
-          userRepository.getById(user_order.getId_user()).setDollar_balance(dollarUser.add(totalValue));
-          userRepository.getById(buyOrder.getId_user()).setDollar_balance(dollarList.subtract(totalValue));
+          // att o dollar balance do vendedor
+          userRepository.getById(user_order.getId_user()).setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
+          if(buyOrder.getPrice().compareTo(user_order.getPrice())>= 0){
+            userRepository.getById(buyOrder.getId_user()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
+          }
 
-          LocalDateTime now = LocalDateTime.now();
-          Timestamp timestamp = Timestamp.valueOf(now);
-
-          // att o updated on em cada um dos envovlidos
           user_order.setUpdated_on(timestamp);
           buyOrder.setUpdated_on(timestamp);
+          userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
+          userRepository.getById(buyOrder.getId_user()).setUpdated_on(timestamp);
 
-          // att o stockBallance do comprador.
+          // att o stockBallance do comprador --> buyerOrder
           try {
+            Integer updateVolumeStock = user_stock_balanceRepository
+                .findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock()).getVolume() + setVolume;
+
             user_stock_balanceRepository.findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock())
                 .setVolume(updateVolumeStock);
+
           } catch (NullPointerException e) {
             user_stock_balanceRepository.createStockBalance(buyOrder.getId_stock(), buyOrder.getId_user(),
                 buyOrder.getUpdated_on(),
