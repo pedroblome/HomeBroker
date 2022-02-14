@@ -1,6 +1,6 @@
 <template>
   <div id="profile">
-    <h1>My User Profile (ID Token Claims)</h1>
+    <h1>Where the data of stocks will</h1>
     <p>
       Below is the information from your ID token.
     </p>
@@ -16,6 +16,7 @@
         <td>{{claim.claim}}</td>
         <td :id="'claim-' + claim.claim">{{claim.value}}</td>
       </tr>
+      <h1>teste 123</h1>
       </tbody>
     </table>
   </div>

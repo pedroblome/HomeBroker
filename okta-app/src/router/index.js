@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { LoginCallback, navigationGuard } from '@okta/okta-vue'
-import HomeComponent from '@/components/Home'
+import Home from '@/views/Home' //e pra chamar o Home.vue dentro do views
 import LoginComponent from '@/components/Login'
 import ProfileComponent from '@/components/Profile'
 
@@ -9,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: HomeComponent,
+      component: Home,
       meta: {
         requiresAuth: true
       }

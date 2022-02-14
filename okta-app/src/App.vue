@@ -48,12 +48,14 @@ export default {
 </script>
 
 <style>
-nav div a { margin-right: 10px }
+nav div a { margin-right: 300px }
 #app {
-  width: 800px;
+  width: 1200;
+  color: rgb(61, 13, 13);
   margin: 0 auto;
 }
 a {
+  color: blue;
   text-decoration: underline;
   cursor: pointer;
 }
