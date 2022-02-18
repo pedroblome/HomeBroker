@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -126,6 +128,15 @@ public class User_orderService {
     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
         "Cannot create order with type diferent of 1 or 0!!");
   }
+ public ResponseEntity<User_order> deleteOrder(@PathVariable long order_id){
+   User_order order = user_orderRepository.getById(order_id);
+   BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
+   BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
+   userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+   order.setStatus(0);
+   User_order orderDelete = user_orderRepository.save(order);
+   return ResponseEntity.ok().body(orderDelete);
+ }
 
   public boolean checkUser(@RequestBody User_order user_order) {
 
