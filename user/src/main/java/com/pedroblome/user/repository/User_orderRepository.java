@@ -9,6 +9,7 @@ import com.pedroblome.user.model.User_order;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -44,5 +45,6 @@ public interface User_orderRepository extends JpaRepository<User_order, Long> {
 
     @Query(value = "select * from public.user_order where  id_user= ?1 and status = 1 order by created_on", nativeQuery = true) 
     List<User_order> findOrdersByIdUser(Long id_user);
+
 
 }

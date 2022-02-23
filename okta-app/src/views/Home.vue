@@ -1,15 +1,14 @@
 <!-- This example requires Tailwind CSS v2.0+ -->
 <template>
-  <div class="flex flex-col">
-    <div class="-my-0 overflow-x-auto sm:-mx-2 lg:-mx-8">
-      <div class="py-10 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+<div class="py-10 align-middle inline-block min-w-full sm:px-6 lg:px-8">
         <div
           class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg "
         >
         <input
-          position = "mid"
           type="text"
           blue-200
+          border
+          width="100px"
           placeholder="Search Stock"
           @keyup="searchStock()"
           v-model="textSearch"
@@ -51,10 +50,11 @@
                                     <label for="two">Buy</label>
                                     <br>
                                   Volume Order: 
-                                <input v-model="volume" placeholder=" vol" style="width:54px; background-color:#BFDBFE; border-width:2;  " type="number" step="1" min="1"> <label for=""></label>
+                                <input v-model="volume" placeholder=" vol" style="width:54px; background-color:#BFDBFE; border-width:2;  " type="number" step="1" min="1" class="                border border-slate-300 
+                                "> <label for=""></label>
                                 <br>
                                   Price: R$ 
-                                <input v-model="price" placeholder=" price" style="width:74px; background-color:#BFDBFE; border-width:2;  " type="number" step="1" min="1"> <label for=""></label>
+                                <input class="border " v-model="price" placeholder=" price" style="width:74px; background-color:#BFDBFE; border-width:2;  " type="number" step="1" min="1"> <label for=""></label>
                                      
                                 </tr>
                              </thead>
@@ -62,15 +62,16 @@
                             <!-- Modal footer -->
                             <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-200 dark:border-gray-600">
                                 <button @click="postOrdeStock" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Do Order</button>
-                                <button @click="openModal=false" data-modal-toggle="defaultModal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">Cancel</button>
+                          
+                                <button type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">Cancel</button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-     <table class=" bg-200 table-fixed	 w-24 min-w-full hover:min-w-0 divide-gray-130">
-            <thead class="bg-gray-50">
-              <tr >
+        <div  id = "div-table" class="w-full overflow-y-auto">
+          <table id= "tableStock" class="w-full table-auto">
+            <thead class="bg-gray-300 py-5"> 
+              <tr>
                 <th scope="col" class="px-0 py-3.5 text-midle text-xs font-medium text-gray-500 uppercase tracking-wider">Stock ID</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock name</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock Symbol</th>
@@ -78,31 +79,34 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMax PRICE</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMin PRICE</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMax PRICE</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Order/ Graphic</th>  
               </tr>
-                <tr v-for="stock in filteredStocks" :key="stock.stock_id">
-               <th scope="col" class="px-6 py-3 text-midle text-xs font-large text-black-700 uppercase tracking-wider">{{stock.id}} </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_name}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_symbol}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_min}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_max}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_min}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_max}}</th>
-               <button @click="openOrder(stock.id,stock.stock_name, stock.stock_symbol )" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button" data-modal-toggle="defaultModal">
-                 Order chose
-                 
-               </button>
-  
-              <!-- Main modal -->
-                
-              </tr>
+            <tr class="overflow-y-auto" v-for="stock in filteredStocks" :key="stock.stock_id">
+                <td scope="col" class="px-6 py-3 text-midle text-xs font-large text-black-700 uppercase tracking-wider">{{stock.id}} </td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_name}}</td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_symbol}}</td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_min}}</td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_max}}</td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_min}}</td>
+                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_max}}</td>
+                 <th class="flex padding=10px"> 
+                 <button @click="openOrder(stock.id,stock.stock_name, stock.stock_symbol )" class="block text-white bg-blue-500 hover:bg-blue-800  rounded " type="button">
+                 Order 
+                 </button>
+                 &nbsp; &nbsp;
+                <button class="block text-white bg-green-500 hover:bg-green-800  rounded " type="button">
+                 Graphic
+                 </button>
+                 </th>
+            </tr>
+
             </thead>  
-           <thead>
-          </thead>
           </table>
+          
+        </div>
+     
         </div>
       </div>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -200,3 +204,11 @@ export default {
   },
 };
 </script>
+<style scoped>
+
+
+div-table{
+  overflow-y: auto;
+}
+
+</style>

@@ -1,6 +1,8 @@
 package com.pedroblome.user.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ public class User {
     @JoinColumn(name = "id")
     private Long id;
     private String name;
+    private String email;
     private String password;
     private BigDecimal dollar_balance;
     private boolean enabled;
@@ -34,6 +37,13 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {

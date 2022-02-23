@@ -11,11 +11,8 @@ createApp(App)
     .use(router)
     .use(OktaVue, {
         oktaAuth,
-        onAuthRequired: () => {
+         onAuthResume: () => {
             router.push('/login')
-        },
-        onAuthResume: () => {
-            router.push('/login')
-        },
+        }
     })
     .mount('#app')
