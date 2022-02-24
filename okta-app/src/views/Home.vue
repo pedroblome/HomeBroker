@@ -4,18 +4,8 @@
         <div
           class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg "
         >
-        <input
-          type="text"
-          blue-200
-          border
-          width="100px"
-          placeholder="Search Stock"
-          @keyup="searchStock()"
-          v-model="textSearch"
-          class="bg-blue-200 hover:bg-green-200"
-        />
-        <div v-if="openModal" id="defaultModal" aria-hidden="true" class=" flex  overflow-y-auto overflow-x-hidden fixed right-0 left-0 top-4 z-50 justify-center items-center h-modal md:h-full md:inset-0">
-                    <div class="  relative px-4 w-full max-w-2xl h-full md:h-auto">
+          <div v-if="openModal" id="defaultModal" aria-hidden="true" class=" flex  overflow-y-auto overflow-x-hidden fixed right-0 left-0 top-4 z-50 justify-center items-center h-modal md:h-full md:inset-0">
+                      <div class="  relative px-4 w-full max-w-2xl h-full md:h-auto">
                         <!-- Modal content -->
                         <div class=" bg-blue-200 relative bg-white rounded-lg shadow dark:bg-gray-700">
                             <!-- Modal header -->
@@ -63,13 +53,42 @@
                             <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-200 dark:border-gray-600">
                                 <button @click="postOrdeStock" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Do Order</button>
                           
-                                <button type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">Cancel</button>
+                                <button @click="openModal=false"  type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">Cancel</button>
                             </div>
                         </div>
                     </div>
                 </div>
-        <div  id = "div-table" class="w-full overflow-y-auto">
-          <table id= "tableStock" class="w-full table-auto">
+        <div class="bg-gray-300">
+          <input
+          type="text"
+          border
+          width="100px"
+          placeholder="Search Stock"
+          @keyup="searchStock()"
+          v-model="textSearch"
+          class="bg-gray-300 hover:bg-green-200"
+      
+          />
+          <div >
+          <table id= "tableStock" class="w-full table-auto" style="widht: 200px">
+            <caption style="text-align:center; font-size:29px; background-color: gray">Home Broker</caption>
+            <thead class="bg-gray-600 py-5"> 
+              <tr class="bg-gray-500">
+
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock id</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock name</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock Symbol</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMin PRICE</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMax PRICE</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMin PRICE</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMax PRICE</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Order/ Graphic</th>  
+              </tr>
+            </thead>  
+           </table> 
+          </div>
+          <div class="w-full overflow-y-auto" style="height:440px" >
+            <table  class="w-full table-auto">
             <thead class="bg-gray-300 py-5"> 
               <tr>
                 <th scope="col" class="px-0 py-3.5 text-midle text-xs font-medium text-gray-500 uppercase tracking-wider">Stock ID</th>
@@ -102,9 +121,8 @@
 
             </thead>  
           </table>
-          
-        </div>
-     
+          </div>
+         </div>
         </div>
       </div>
 </template>
@@ -140,6 +158,7 @@ export default {
         this.claims = await this.$auth.getUser();
         let accessToken = this.$auth.getAccessToken();
         console.log("Bearer " + accessToken);
+        console.log("chegou no bearer token")
       }
     },
     async getStocks() {
@@ -149,6 +168,7 @@ export default {
       console.log(response.data);
       this.stocks = response.data
       this.filteredStocks = response.data
+      console.log("Bearer " + this.$auth.getAccessToken())
     },
     async openOrder(id,nome,symbol){
       this.openModal=!this.openModal
@@ -204,11 +224,10 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style>
 
+body{
 
-div-table{
-  overflow-y: auto;
 }
 
 </style>
