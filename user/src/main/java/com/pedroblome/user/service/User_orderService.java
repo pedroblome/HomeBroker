@@ -6,11 +6,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.function.BiFunction;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
@@ -18,9 +14,7 @@ import com.pedroblome.user.repository.UserRepository;
 import com.pedroblome.user.repository.User_orderRepository;
 import com.pedroblome.user.repository.User_stock_balanceRepository;
 
-import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JsonParseException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

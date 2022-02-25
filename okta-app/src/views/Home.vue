@@ -1,6 +1,6 @@
 <!-- This example requires Tailwind CSS v2.0+ -->
 <template>
-<div class="py-10 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+<div class="py-5 align-middle inline-block min-w-full sm:px-6 lg:px-8" style="background-color:#2EACB8">
         <div
           class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg "
         >
@@ -102,7 +102,8 @@
               </tr>
             <tr class="overflow-y-auto" v-for="stock in filteredStocks" :key="stock.stock_id">
                 <td scope="col" class="px-6 py-3 text-midle text-xs font-large text-black-700 uppercase tracking-wider">{{stock.id}} </td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_name}}</td>
+                <td scope="col" class="
+        px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_name}}</td>
                 <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_symbol}}</td>
                 <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_min}}</td>
                 <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_max}}</td>

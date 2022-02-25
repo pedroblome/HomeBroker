@@ -1,10 +1,10 @@
 <template>
     <div id="header">
-    <nav>
-      <div>
+    <nav class="bg-gray-800" style="color:white; height:40px; rounded" >
+          <div>
         <tr>
           <router-link to="/">
-            <button
+            <button 
               class="
                 bg-blue-400
                 hover:bg-blue-600
@@ -19,7 +19,7 @@
             </button>
           </router-link>
           <router-link to="/login" v-if="!authenticated">
-            <button
+            <button 
               class="
                 bg-blue-400
                 text-white
@@ -62,9 +62,34 @@
               logout
             </button>
           </a>
-          <a v-if="authenticated">
-           U${{dollarBalance}}
-          </a>     
+          <button
+            style="position:absolute; top: 2px;left:1150px"
+            class="
+              bg-green-400
+              hover:bg-green-600
+              text-white
+              font-medium
+              py-1.5
+              px-3
+              rounded-full
+            "
+          >DEPOSIT</button>
+
+          <span v-if="authenticated" style="position: absolute;
+            top: 10px; left: 555px; ">
+            Bem vindo: {{name}}
+          </span>
+
+          <span v-if="authenticated" style="position: absolute;
+           top: 10px; left: 965px; ">
+           Ballance: U$ {{dollarBalance}}
+         </span>
+          
+    <th>
+      <td>
+        
+      </td>
+    </th>
         </tr>
 
       </div>
@@ -84,13 +109,22 @@ export default {
      return{
       authenticated: false,
       user:[],
-      dollarBalance: ""
+      dollarBalance: "",
+      infoLogin: [],
+      name: "",
+      email: ""
      }
    },
   async created() {
+    this.getInfoLogin();
     await this.isAuthenticated();
     this.getInfoUser();
-    this.$auth.authStateManager.subscribe(this.isAuthenticated);
+    this.claims = await this.$auth.getUser();
+
+
+
+    // this.claims = await Object.entries(await this.$auth.getUser()).map(entry => ({ claim: entry[0], value: entry[1] }))
+
   },
   watch: {
     // Everytime the route changes, check for auth status
@@ -100,16 +134,27 @@ export default {
     async isAuthenticated() {
       this.authenticated = await this.$auth.isAuthenticated();
     },
+    async getInfoLogin(){
+      await Object.entries(await this.$auth.getUser()).map(entry => ({ claim: entry[0], value: entry[1] }))
+      
+
+    },
     async logout() {
       await this.$auth.signOut();
     },
     async getInfoUser() {
+      this.claims = await this.$auth.getUser();
       //iduser = 1 pq n fiz o metodo de verificar qual usuario esta logado no momento. tirar esta duvida
       //o mais rapido possivel.
       const response = await axios.get("http://localhost:8088/users/1", {
         headers: { Authorization: "Bearer " + this.$auth.getAccessToken() },
       });
-      console.log(response.data)
+      console.log(this.claims.name)
+      console.log(this.claims.email)
+
+      this.name = this.claims.name
+      this.email = this.claims.email
+
       this.user = response.data
       this.dollarBalance=this.user.dollar_balance
     

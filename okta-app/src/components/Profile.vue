@@ -1,6 +1,6 @@
 <template>
-  <div class="py-5 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-    <div class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg">
+  <div class="py-5 align-middle inline-block min-w-full sm:px-6 lg:px-8" style="background-color:#2EACB8"> 
+    <div class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg bg-gray-300 ">
       <input
         type="text"
         blue-200
@@ -13,7 +13,7 @@
       />
       <div >
           <table id= "balanceStock" class="w-full table-auto" style="widht: 200px">
-          <caption style="text-align:center; font-size:29px">User Stock Balance</caption>
+          <caption style="text-align:center; font-size:29px; background-color: gray">User Stock Balance</caption>
           <thead class="bg-gray-600 py-5 "> 
           <tr>
           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Id</th>
@@ -40,29 +40,29 @@
       </div>
     </div>
 
-    <div class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg">
+    <div class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg bg-gray-300 " >
       <input
         type="text"
         blue-200
         border
         width="100px"
         placeholder="Search Order"
-        @keyup="searchStock()"
-        v-model="textSearch"
+        @keyup="searchOrders"
+        v-model="textSearchOrder"
         class="bg-blue-200 hover:bg-green-200"
       />
       <div>
           <table id= "balanceStock" class="w-full table-auto" style="widht: 200px">
-          <caption style="text-align:center; font-size:29px">Users Orders Open</caption>
+          <caption style="text-align:center; font-size:29px; background-color: gray">Users Orders Open</caption>
           <thead class="bg-gray-600 py-4 "> 
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Id</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Created on</th>  
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Volume</th>  
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Price</th>  
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Updated on</th>  
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Remaing Volume</th>  
+              <th style="width:13px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Id</th>
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock</th>
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Created on</th>  
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Volume</th>  
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Price</th>  
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Updated on</th>  
+              <th style="width:43px " scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Remaing Volume</th>  
             </tr>
           </thead>
           </table>
