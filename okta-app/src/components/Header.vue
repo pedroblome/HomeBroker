@@ -62,7 +62,7 @@
               logout
             </button>
           </a>
-          <button
+          <button v-if="authenticated"
             style="position:absolute; top: 2px;left:1150px"
             class="
               bg-green-400

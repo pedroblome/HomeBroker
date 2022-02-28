@@ -2,6 +2,7 @@ package com.pedroblome.user.service;
 
 import java.math.BigDecimal;
 
+import com.pedroblome.user.controller.dto.AppendDto;
 import com.pedroblome.user.model.User;
 import com.pedroblome.user.repository.UserRepository;
 
@@ -14,10 +15,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public  ResponseEntity<?> depositUser(User user) {
+    public  ResponseEntity<?> depositUser(AppendDto appendDto) {
         
-        BigDecimal newDollar_balance = userRepository.getById(user.getId()).getDollar_balance().add(BigDecimal.valueOf("valueDeposit"));
-        userRepository.getById(user.getId()).setDollar_balance(newDollar_balance);
+        BigDecimal newDollar_balance = userRepository.getById(appendDto.id).getDollar_balance().add((appendDto.amount));
+        userRepository.getById(appendDto.id).setDollar_balance(newDollar_balance);
+        User userSaveDeposit = userRepository.save(userRepository.getById(appendDto.id));
+        
+        return ResponseEntity.ok().body(userSaveDeposit);
 
 
 
