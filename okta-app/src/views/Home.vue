@@ -4,6 +4,7 @@
         <div
           class="shadow overflow-hidden border-b border-red-10 sm:rounded-lg "
         >
+        <!-- parte para abertura de ordens. compra e venda -->
           <div v-if="openModal" id="defaultModal" aria-hidden="true" class=" flex  overflow-y-auto overflow-x-hidden fixed right-0 left-0 top-4 z-50 justify-center items-center h-modal md:h-full md:inset-0">
                       <div class="  relative px-4 w-full max-w-2xl h-full md:h-auto">
                         <!-- Modal content -->
@@ -58,8 +59,9 @@
                         </div>
                     </div>
                 </div>
+          <!-- parte para deposito de dolar -->
         <div class="bg-gray-300">
-          <input
+        <input
           type="text"
           border
           width="100px"
@@ -67,71 +69,292 @@
           @keyup="searchStock()"
           v-model="textSearch"
           class="bg-gray-300 hover:bg-green-200"
-      
-          />
-          <div >
-          <table id= "tableStock" class="w-full table-auto" style="widht: 200px">
-            <caption style="text-align:center; font-size:29px; background-color: gray">Home Broker</caption>
-            <thead class="bg-gray-600 py-5"> 
+        />
+        <div class="bg-gray-500">
+          <table id="tableStock" class="w-full table-auto" style="widht: 200px">
+            <caption
+              style="
+                text-align: center;
+                font-size: 29px;
+                background-color: gray;
+              "
+            >
+              Home Broker
+            </caption>
+            <thead class="bg--200 py-5">
               <tr class="bg-gray-500">
-
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock id</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock name</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock Symbol</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMin PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMax PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMin PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMax PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Order/ Graphic</th>  
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium              
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  Stock id
+                </th>
+                <th
+                  style="position: relative; left: -5px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  Stock name
+                </th>
+                <th
+                  style="position: relative; left: -5px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  Stock Symbol
+                </th>
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  AskMin PRICE
+                </th>
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  AskMax PRICE
+                </th>
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  BidMin PRICE
+                </th>
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  BidMax PRICE
+                </th>
+                <th
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  Order/ Graphic
+                </th>
               </tr>
-            </thead>  
-           </table> 
-          </div>
-          <div class="w-full overflow-y-auto" style="height:440px" >
-            <table  class="w-full table-auto">
-            <thead class="bg-gray-300 py-5"> 
-              <tr>
-                <th scope="col" class="px-0 py-3.5 text-midle text-xs font-medium text-gray-500 uppercase tracking-wider">Stock ID</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock name</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Stock Symbol</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMin PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">AskMax PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMin PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">BidMax PRICE</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-grey-500 uppercase tracking-wider">Order/ Graphic</th>  
-              </tr>
-            <tr class="overflow-y-auto" v-for="stock in filteredStocks" :key="stock.stock_id">
-                <td scope="col" class="px-6 py-3 text-midle text-xs font-large text-black-700 uppercase tracking-wider">{{stock.id}} </td>
-                <td scope="col" class="
-        px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_name}}</td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">{{stock.stock_symbol}}</td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_min}}</td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.ask_max}}</td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_min}}</td>
-                <td scope="col" class="px-6 py-3 text-left text-xs font-large text-black-700 uppercase tracking-wider">$ {{stock.bid_max}}</td>
-                 <th class="flex padding=10px"> 
-                 <button @click="openOrder(stock.id,stock.stock_name, stock.stock_symbol )" class="block text-white bg-blue-500 hover:bg-blue-800  rounded " type="button">
-                 Order 
-                 </button>
-                 &nbsp; &nbsp;
-                <button class="block text-white bg-green-500 hover:bg-green-800  rounded " type="button">
-                 Graphic
-                 </button>
-                 </th>
-            </tr>
-
-            </thead>  
+            </thead>
           </table>
-          </div>
-         </div>
+        </div>
+        <div class="w-full overflow-y-auto" style="height: 440px">
+          <table class="w-full table-auto">
+            <thead class="bg-gray-300 py-5">
+              <tr
+                class="overflow-y-auto"
+                v-for="stock in filteredStocks"
+                :key="stock.stock_id"
+              >
+                <td
+                  style="position:sticky;"
+                  scope="col"
+                  class="
+                    text-center
+                    px-6
+                    py-3
+                    text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  {{ stock.id }}
+                </td>
+                <td
+                  style="position: sticky; left: 120px; width: 50px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  {{ stock.stock_name }}
+                </td>
+                <td
+                  style="position: sticky; left: 0px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  {{ stock.stock_symbol }}
+                </td>
+                <span
+                  style="position: sticky; left: 350px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  $ {{ stock.ask_min }}
+                </span>
+                <td
+                  style="position: sticky; left: 570px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  $ {{ stock.ask_max }}
+                </td>
+                <td
+                  style="position: sticky; left: 730px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  $ {{ stock.bid_min }}
+                </td>
+                <td
+                  style="position: sticky; left: 882px"
+                  scope="col"
+                  class="
+                    px-6
+                    py-3
+                    text-left text-xs
+                    font-large
+                    text-black-700
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  $ {{ stock.bid_max }}
+                </td>
+                <th class="flex padding=10px">
+                  <button
+                    style="position: sticky; left: 1050px;"
+                    @click="
+                      openOrder(stock.id, stock.stock_name, stock.stock_symbol)
+                    "
+                    class="
+                      block
+                      text-white
+                      bg-blue-500
+                      hover:bg-blue-800
+                      rounded-lg
+                      text-m
+                      p-1.5
+                    "
+                    type="button"
+                  >
+                    Order
+                  </button>
+                  &nbsp; &nbsp;
+                  <button
+                    style="position: sticky; left: 1115px"
+                    class="
+                      block
+                      text-white
+                      bg-green-500
+                      hover:bg-green-800
+                      rounded-lg
+                      text-m
+                      p-1.5
+                    "
+                    type="button"
+                  >
+                    Graphic
+                  </button>
+                </th>
+              </tr>
+            </thead>
+          </table>
         </div>
       </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import axios from "axios";
 export default {
-
   name: "getStocks",
   data() {
     return {
@@ -139,12 +362,12 @@ export default {
       filteredStocks: [],
       textSearch: "",
       openModal: false,
-      stock_name:"",
-      stock_symbol:"",
+      stock_name: "",
+      stock_symbol: "",
       id: "",
       volume: "",
       price: "",
-      picked: ""
+      picked: "",
     };
   },
 
@@ -153,13 +376,12 @@ export default {
     this.getStocks();
   },
   methods: {
-    
     async getToken() {
       if (this.$root.authenticated) {
         this.claims = await this.$auth.getUser();
         let accessToken = this.$auth.getAccessToken();
         console.log("Bearer " + accessToken);
-        console.log("chegou no bearer token")
+        console.log("chegou no bearer token");
       }
     },
     async getStocks() {
@@ -167,68 +389,64 @@ export default {
         headers: { Authorization: "Bearer " + this.$auth.getAccessToken() },
       });
       console.log(response.data);
-      this.stocks = response.data
-      this.filteredStocks = response.data
-      console.log("Bearer " + this.$auth.getAccessToken())
+      this.stocks = response.data;
+      this.filteredStocks = response.data;
+      console.log("Bearer " + this.$auth.getAccessToken());
     },
-    async openOrder(id,nome,symbol){
-      this.openModal=!this.openModal
-      console.log(id,nome,symbol)
-      this.stock_name=nome;
-      this.stock_symbol=symbol;
+    async openOrder(id, nome, symbol) {
+      this.openModal = !this.openModal;
+      console.log(id, nome, symbol);
+      this.stock_name = nome;
+      this.stock_symbol = symbol;
       this.id = id;
-      
-
     },
-    async postOrdeStock(){
-            
+    async postOrdeStock() {
       const body = {
-        "id_user": 1, 
-        "id_stock": this.id,
-        "price":this.price,
-        "status": 1,
-        "stock_name": this.stock_name,
-        "stock_symbol": this.stock_symbol,
-        "type": this.picked ,
-        "volume":this.volume 
-            }
-     try{
-        var now = new Date()
-        
-        const response = await axios.post("http://localhost:8088/users_order",body,{
-         headers: { Authorization: "Bearer " + this.$auth.getAccessToken() },
-         
-      });
-        window.alert("Order added with success! \n\n"+now)
-        this.openModal=!this.openModal
-        console.log(response)
-        console.log(body)
-      
-     }
-     catch(error){
-        window.alert(error.response.data.message + "\n\n"+ now );
-        this.openModal=!this.openModal
-        console.log(error.response.data.message);
-        console.log(body)
+        id_user: 1,
+        id_stock: this.id,
+        price: this.price,
+        status: 1,
+        stock_name: this.stock_name,
+        stock_symbol: this.stock_symbol,
+        type: this.picked,
+        volume: this.volume,
+      };
+      try {
+        var now = new Date();
 
-     }
-     
+        const response = await axios.post(
+          "http://localhost:8088/users_order",
+          body,
+          {
+            headers: { Authorization: "Bearer " + this.$auth.getAccessToken() },
+          }
+        );
+        window.alert("Order added with success! \n\n" + now);
+        this.openModal = !this.openModal;
+        console.log(response);
+        console.log(body);
+      } catch (error) {
+        window.alert(error.response.data.message + "\n\n" + now);
+        this.openModal = !this.openModal;
+        console.log(error.response.data.message);
+        console.log(body);
+      }
     },
-     searchStock() {
+    searchStock() {
       this.filteredStocks = this.stocks.filter(
         (stock) =>
-          stock.stock_name.toLowerCase().includes(this.textSearch.toLowerCase()) ||
-          stock.stock_symbol.toLowerCase().includes(this.textSearch.toLowerCase())
+          stock.stock_name
+            .toLowerCase()
+            .includes(this.textSearch.toLowerCase()) ||
+          stock.stock_symbol
+            .toLowerCase()
+            .includes(this.textSearch.toLowerCase())
       );
     },
-   
   },
 };
 </script>
 <style>
-
-body{
-
+body {
 }
-
 </style>

@@ -1,7 +1,6 @@
 package com.pedroblome.user.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.repository.User_orderRepository;
