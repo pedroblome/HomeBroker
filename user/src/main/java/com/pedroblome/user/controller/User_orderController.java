@@ -2,6 +2,8 @@ package com.pedroblome.user.controller;
 
 import java.util.List;
 
+import javax.persistence.criteria.Order;
+
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.repository.User_orderRepository;
 import com.pedroblome.user.service.User_orderService;
@@ -48,10 +50,10 @@ public class User_orderController {
     public List<User_order> listOrderById(@PathVariable Long id_user) {
         return user_orderRepository.findOrdersByIdUser(id_user);
     }
-
+    
     @PutMapping("closeOrder/{order_id}")
-    public ResponseEntity<?> deleteOrder(@RequestHeader("Authorization") String token, @RequestBody User_order user_order) {
-        return user_orderService.deleteOrder(user_order);
+    public ResponseEntity<?> deleteOrder(@RequestHeader("Authorization") String token, @PathVariable Long order_id) {
+        return user_orderService.deleteOrder(order_id, token, null);
 
     }
 

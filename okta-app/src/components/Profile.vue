@@ -253,6 +253,21 @@
               >
                 Updated on
               </th>
+                <th
+                style="width: 40px;  position:relative; left:-40px"
+                scope="col"
+                class="
+                  px-6
+                  py-3
+                  text-left text-xs
+                  font-medium
+                  text-grey-500
+                  uppercase
+                  tracking-wider
+                "
+              >
+                Type
+              </th>
               <th
                 style="width: 43px;  position:relative; left:-65px"
                 scope="col"
@@ -272,7 +287,7 @@
           </thead>
         </table>
       </div>
-      <div class="w-full overflow-y-auto" style="height: 200px">
+      <div class="w-full overflow-y-auto" style="height: 180px">
         <table id="userOrders" class="w-full table-auto">
           <thead class="bg-gray-300 py-5">
             <tr v-for="stock in filteredOrders" :key="stock.stock_id">
@@ -356,6 +371,20 @@
                 "
               >
                 {{ stock.updated_on }} un.
+              </td>
+              <td 
+                style="font-size: 17px;  position:relative; left:-60px"
+                class="
+                  px-6
+                  py-3
+                  text-right text-xs
+                  font-large
+                  text-black-700
+                  tracking-wider
+                "
+              >
+              <label v-if="stock.type==1">buy</label>
+              <label v-if="stock.type==0">sell</label>
               </td>
               <td
                 style="font-size: 17px;  position:relative; left:-60px"
@@ -463,7 +492,6 @@ export default {
     async closeOrder(id) {
       console.log(id);
       const url = "http://localhost:8088/users_order/closeOrder/" + id;
-
       await fetch(url, {
         method: "PUT",
         headers: {

@@ -31,7 +31,9 @@ public class User_order {
     private Timestamp created_on;
     private Timestamp updated_on;
 
-
+    public Long getId() {
+        return id;
+    }
 
     public Integer getRemaing_volume() {
         return remaing_volume;
@@ -140,10 +142,6 @@ public class User_order {
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
 
-    }
-
-    public User_order getId() {
-        return null;
     }
 
 }
