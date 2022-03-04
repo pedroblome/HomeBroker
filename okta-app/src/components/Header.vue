@@ -119,7 +119,7 @@
 
           <span v-if="authenticated" style="position: absolute;
            top: 10px; left: 965px; ">
-           Ballance: U$ {{dollarBalance.toFixed(2)}}
+           Ballance: U$ {{dollarBalance}}
          </span>
           
     <th>

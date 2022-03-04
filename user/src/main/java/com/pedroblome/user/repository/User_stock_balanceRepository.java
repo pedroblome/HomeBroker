@@ -14,7 +14,7 @@ public interface User_stock_balanceRepository extends JpaRepository<User_stock_b
     User_stock_balance getByIdUser = null;
 
     //stocks por usuario
-    @Query("SELECT  new com.pedroblome.user.model.User_stock_balance ( stock.id_user, stock.id_stock, stock.stock_name, stock.stock_symbol,stock.volume) FROM User_stock_balance stock where stock.id_user = :id_user ")
+    @Query("SELECT  new com.pedroblome.user.model.User_stock_balance ( stock.id_user, stock.id_stock, stock.stock_name, stock.stock_symbol,stock.volume) FROM User_stock_balance stock where stock.id_user = :id_user and stock.volume>0 ")
     List<User_stock_balance> findStockByUser(@Param("id_user") Long id_user);
 
     @Query("SELECT  new com.pedroblome.user.model.User_stock_balance (stock.volume) FROM User_stock_balance stock where (stock.id_user = :id_user) and (stock.id_stock = :id_stock)")
@@ -32,7 +32,7 @@ public interface User_stock_balanceRepository extends JpaRepository<User_stock_b
     
 
     
-   
+
 
 
 

@@ -315,9 +315,9 @@
                   tracking-wider
                 "
               >
-                {{ stock.stock_symbol }}
+                {{ stock.stock_name }}
                 <span style="font-size: 12px; color: gray">{{
-                  stock.stock_name
+                  stock.stock_symbol
                 }}</span>
               </td>
               <td
