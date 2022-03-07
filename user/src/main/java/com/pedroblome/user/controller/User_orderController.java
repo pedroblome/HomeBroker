@@ -50,8 +50,8 @@ public class User_orderController {
     }
 
     @PutMapping("closeOrder/{order_id}")
-    public ResponseEntity<?> deleteOrder(@RequestHeader("Authorization") String token, @RequestBody User_order user_order, @PathVariable long order_id) {
-        return user_orderService.deleteOrder(order_id, user_order);
+    public ResponseEntity<?> deleteOrder(@PathVariable long order_id) {
+        return user_orderService.deleteOrder(order_id);
 
     }
 

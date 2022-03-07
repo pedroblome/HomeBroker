@@ -127,30 +127,12 @@ public class User_orderService {
         "Cannot create order with type diferent of 1 or 0!!");
   }
 
-  // public ResponseEntity<User_order> deleteOrder(@PathVariable Long order_id ) {
-  //   User_order user_order = user_orderRepository.getById(order_id);
-
-  //   User_order order = user_orderRepository.getById(user_order.getId_stock());
-  //   BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
-  //   BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
-  //   userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
-  //   order.setStatus(0);
-  //   User_order orderDelete = user_orderRepository.save(order);
-  //   return orderDelete;
-  // }
-  public ResponseEntity<User_order> deleteOrder(@PathVariable long order_id, User_order user_order) {
+  public ResponseEntity<User_order> deleteOrder(@PathVariable Long order_id ) {
     User_order order = user_orderRepository.getById(order_id);
-    // tipo de venda
-    if (user_orderRepository.getById(order_id).getType() == 1) {
-      BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
-      BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
-      userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
-      order.setStatus(0);
-    } else {// tipo de venda
-      long id_user = user_orderRepository.getById(order_id).getId_user();
-      long id_stock = user_orderRepository.getById(order_id).getId_stock();
-      }
-    
+    BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
+    BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
+    userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+    order.setStatus(0);
     User_order orderDelete = user_orderRepository.save(order);
     return ResponseEntity.ok().body(orderDelete);
   }
@@ -387,29 +369,17 @@ public class User_orderService {
     if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
       bidmin = user_orderRepository.bidMin(user_order.getId_stock());
       bidmax = user_orderRepository.bidMax(user_order.getId_stock());
-      if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
-        askmin = user_orderRepository.askMin(user_order.getId_stock());
-        askmax = user_orderRepository.askMax(user_order.getId_stock());
-      }
-
+     
     }
     if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
       askmin = user_orderRepository.askMin(user_order.getId_stock());
       askmax = user_orderRepository.askMax(user_order.getId_stock());
-
-      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
-        bidmin = user_orderRepository.bidMin(user_order.getId_stock());
-        bidmax = user_orderRepository.bidMax(user_order.getId_stock());
-
-      }
     }
+
+   
     StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), askmin, askmax, bidmin, bidmax,
         user_order.getUpdated_on());
     return updateStock;
 
-  }
-
-  public ResponseEntity<?> deleteOrder(long id_stock) {
-    return null;
   }
 }
