@@ -40,7 +40,7 @@ public class User_orderService {
 
   // verifica usuario
 
-  public ResponseEntity<?> addOrder(User_order user_order, String token) {
+  public User_order addOrder(User_order user_order, String token) {
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
@@ -100,7 +100,7 @@ public class User_orderService {
 
               matchOrder(user_order);
               User_order orderSave = user_orderRepository.save(user_order);
-              return ResponseEntity.ok().body(orderSave);
+              return orderSave;
 
             }
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -122,7 +122,7 @@ public class User_orderService {
         "Cannot create order with type diferent of 1 or 0!!");
   }
   
-  public ResponseEntity<?> deleteOrder(@PathVariable long order_id, String token, User_order user_order) {
+  public User_order deleteOrder(@PathVariable long order_id, String token, User_order user_order) {
     User_order order = user_orderRepository.getById(order_id);
     // tipo de venda
     if (user_orderRepository.getById(order_id).getType() == 1) {
@@ -151,7 +151,7 @@ public class User_orderService {
       }
     }
     User_order orderDelete = user_orderRepository.save(order);
-    return ResponseEntity.ok().body(orderDelete);
+    return orderDelete;
     
   }
 
@@ -216,7 +216,7 @@ public class User_orderService {
 
   }
 
-  public ResponseEntity<?> matchOrder(@RequestBody User_order user_order) {
+  public User_order matchOrder(@RequestBody User_order user_order) {
 
     List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(),
         user_order.getId_user());
@@ -368,7 +368,7 @@ public class User_orderService {
       }
     }
     User_order orderMatch = user_orderRepository.save(user_order);
-    return ResponseEntity.ok().body(orderMatch);
+    return orderMatch;
 
   }
 
