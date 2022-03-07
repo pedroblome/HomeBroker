@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
@@ -40,7 +41,7 @@ public class User_orderService {
 
   // verifica usuario
 
-  public User_order addOrder(User_order user_order, String token) {
+  public ResponseEntity<?> addOrder(User_order user_order, String token) {
 
     LocalDateTime now = LocalDateTime.now();
     Timestamp timestamp = Timestamp.valueOf(now);
@@ -68,6 +69,18 @@ public class User_orderService {
               }
 
               // criando o dto e a conexao
+
+              BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
+              BigDecimal newBalance = userRepository.getById(user_order.getId_user()).getDollar_balance()
+                  .subtract(totalOrder);
+
+              if (user_order.getType() == 1) {
+                userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
+              }
+
+              matchOrder(user_order);
+              User_order orderSave = user_orderRepository.save(user_order);
+
               try {
 
                 StockAskBidDto newAskBid = this.checkAskBid(user_order);
@@ -91,16 +104,8 @@ public class User_orderService {
               } catch (URISyntaxException e) {
                 e.printStackTrace();
               }
-              BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
-              BigDecimal newBalance =   userRepository.getById(user_order.getId_user()).getDollar_balance().subtract(totalOrder);
-              
-              if(user_order.getType()==1){
-                userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
-              }
 
-              matchOrder(user_order);
-              User_order orderSave = user_orderRepository.save(user_order);
-              return orderSave;
+              return ResponseEntity.ok().body(orderSave);
 
             }
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -121,8 +126,19 @@ public class User_orderService {
     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
         "Cannot create order with type diferent of 1 or 0!!");
   }
-  
-  public User_order deleteOrder(@PathVariable long order_id, String token, User_order user_order) {
+
+  // public ResponseEntity<User_order> deleteOrder(@PathVariable Long order_id ) {
+  //   User_order user_order = user_orderRepository.getById(order_id);
+
+  //   User_order order = user_orderRepository.getById(user_order.getId_stock());
+  //   BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
+  //   BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
+  //   userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+  //   order.setStatus(0);
+  //   User_order orderDelete = user_orderRepository.save(order);
+  //   return orderDelete;
+  // }
+  public ResponseEntity<User_order> deleteOrder(@PathVariable long order_id, User_order user_order) {
     User_order order = user_orderRepository.getById(order_id);
     // tipo de venda
     if (user_orderRepository.getById(order_id).getType() == 1) {
@@ -130,38 +146,23 @@ public class User_orderService {
       BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
       userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
       order.setStatus(0);
-
     } else {// tipo de venda
       long id_user = user_orderRepository.getById(order_id).getId_user();
       long id_stock = user_orderRepository.getById(order_id).getId_stock();
-      String name = user_orderRepository.getById(order_id).getStock_name();
-      String symbol = user_orderRepository.getById(order_id).getStock_symbol();
-      int newVolume = user_orderRepository.getById(order_id).getRemaing_volume() +
-          user_stock_balanceRepository.findByUserStock(id_user, id_stock).getVolume();
-      LocalDateTime now = LocalDateTime.now();
-      Timestamp timestamp = Timestamp.valueOf(now);
-
-      try {
-        user_stock_balanceRepository.findByUserStock(id_user, id_stock).setVolume(newVolume);
-        order.setStatus(0);
-
-      } catch (NullPointerException e) {
-        user_stock_balanceRepository.createStockBalance(id_stock, id_user, timestamp, name, symbol, timestamp, newVolume);
-        order.setStatus(0);
       }
-    }
-    User_order orderDelete = user_orderRepository.save(order);
-    return orderDelete;
     
+    User_order orderDelete = user_orderRepository.save(order);
+    return ResponseEntity.ok().body(orderDelete);
   }
 
   public boolean checkUser(@RequestBody User_order user_order) {
 
     if (userRepository.existsById(user_order.getId_user())) {
       BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
-      if (user_order.getType() == 1 && totalOrder.compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance())<= 0) {
+      if (user_order.getType() == 1
+          && totalOrder.compareTo(userRepository.getById(user_order.getId_user()).getDollar_balance()) <= 0) {
         return true;
-        
+
       }
       if (user_order.getType() == 0) {
         try {
@@ -182,6 +183,7 @@ public class User_orderService {
     return false;
   }
 
+  // consulta o body de um post order, name=id=symbol
   public Boolean checkStock(Stockdto stockdto, String token) {
     try {
 
@@ -216,7 +218,7 @@ public class User_orderService {
 
   }
 
-  public User_order matchOrder(@RequestBody User_order user_order) {
+  public ResponseEntity<?> matchOrder(@RequestBody User_order user_order) {
 
     List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(),
         user_order.getId_user());
@@ -262,12 +264,12 @@ public class User_orderService {
           if (sellOrders.getRemaing_volume() == 0) {
             sellOrders.closeOrder();
           }
-          //att o dollar balance comprador e vendedor.
+          // att o dollar balance comprador e vendedor.
           userRepository.getById(sellOrders.getId_user()).setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
-          if(user_order.getPrice().compareTo(sellOrders.getPrice())>= 0){
-              userRepository.getById(user_order.getId_stock()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
+          if (user_order.getPrice().compareTo(sellOrders.getPrice()) >= 0) {
+            userRepository.getById(user_order.getId_stock()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
           }
- 
+
           user_order.setUpdated_on(timestamp);
           sellOrders.setUpdated_on(timestamp);
           userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
@@ -315,7 +317,6 @@ public class User_orderService {
         LocalDateTime now = LocalDateTime.now();
         Timestamp timestamp = Timestamp.valueOf(now);
 
-        
         if (buyerVolume >= sellerVolume) {
           setVolume = sellerVolume;
         } else {
@@ -329,15 +330,13 @@ public class User_orderService {
 
           if (user_order.getRemaing_volume() == 0) {
             user_order.closeOrder();
-            //verificar se o price era max ou min
           }
           if (buyOrder.getRemaing_volume() == 0) {
             buyOrder.closeOrder();
-      
           }
           // att o dollar balance do vendedor
           userRepository.getById(user_order.getId_user()).setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
-          if(buyOrder.getPrice().compareTo(user_order.getPrice())>= 0){
+          if (buyOrder.getPrice().compareTo(user_order.getPrice()) >= 0) {
             userRepository.getById(buyOrder.getId_user()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
           }
 
@@ -368,90 +367,49 @@ public class User_orderService {
       }
     }
     User_order orderMatch = user_orderRepository.save(user_order);
-    return orderMatch;
+    return ResponseEntity.ok().body(orderMatch);
+
+  }
+
+  public void updateStockBalance(@RequestBody User_order user_order) {
 
   }
 
   public StockAskBidDto checkAskBid(@RequestBody User_order user_order) {
+    // turn price == null if orders is void.
 
     BigDecimal askmin = null;
     BigDecimal askmax = null;
     BigDecimal bidmin = null;
     BigDecimal bidmax = null;
 
-    // ordem de compra
-    if (user_order.getType() == 1) { // atualizar valores de bid min e bid max
-      if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
-        // vendo se substirui o bidmax presente no banco
-        if (user_order.getPrice().compareTo(user_orderRepository.bidMax(user_order.getId_stock())) == 1) {
-          bidmax = user_order.getPrice();
-          if (user_order.getPrice().compareTo(user_orderRepository.bidMin(user_order.getId_stock())) == -1) {
-            bidmin = user_order.getPrice();
-          } else {
-            bidmin = user_orderRepository.bidMin(user_order.getId_stock());
-          }
-
-        } else {
-          bidmax = user_orderRepository.bidMax(user_order.getId_stock());
-          if (user_order.getPrice().compareTo(user_orderRepository.bidMin(user_order.getId_stock())) == -1) {
-            bidmin = user_order.getPrice();
-          } else {
-            bidmin = user_orderRepository.bidMin(user_order.getId_stock());
-          }
-        }
-
-      } else {
-
-        bidmax = user_order.getPrice();
-        bidmin = user_order.getPrice();
-
-      }
+    //att o bid e ask se nao forem nulos com base no rpository de cada stock.
+    if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
+      bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+      bidmax = user_orderRepository.bidMax(user_order.getId_stock());
       if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
-        askmax = user_orderRepository.askMax(user_order.getId_stock());
         askmin = user_orderRepository.askMin(user_order.getId_stock());
-
+        askmax = user_orderRepository.askMax(user_order.getId_stock());
       }
 
     }
-    if (user_order.getType() == 0) { // atualizar valores de bid min e bid max
-      if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
+    if (user_orderRepository.orderStockSell(user_order.getId_stock())) {
+      askmin = user_orderRepository.askMin(user_order.getId_stock());
+      askmax = user_orderRepository.askMax(user_order.getId_stock());
 
-        // vendo se substirui o bidmax presente no banco
-        if (user_order.getPrice().compareTo(user_orderRepository.askMax(user_order.getId_stock())) == 1) {
-          askmax = user_order.getPrice();
-          if (user_order.getPrice().compareTo(user_orderRepository.askMin(user_order.getId_stock())) == -1) {
-            askmin = user_order.getPrice();
-          } else {
-            askmin = user_orderRepository.askMin(user_order.getId_stock());
-          }
-
-        } else {
-          askmax = user_orderRepository.askMax(user_order.getId_stock());
-          if (user_order.getPrice().compareTo(user_orderRepository.askMin(user_order.getId_stock())) == -1) {
-            askmin = user_order.getPrice();
-          } else {
-            askmin = user_orderRepository.askMin(user_order.getId_stock());
-          }
-        }
-
-      } else {
-
-        askmax = user_order.getPrice();
-        askmin = user_order.getPrice();
-
-      }
       if (user_orderRepository.orderStockBuy(user_order.getId_stock())) {
-        bidmax = user_orderRepository.bidMax(user_order.getId_stock());
         bidmin = user_orderRepository.bidMin(user_order.getId_stock());
+        bidmax = user_orderRepository.bidMax(user_order.getId_stock());
 
       }
     }
-
     StockAskBidDto updateStock = new StockAskBidDto(user_order.getId_stock(), askmin, askmax, bidmin, bidmax,
         user_order.getUpdated_on());
     return updateStock;
 
   }
-  //metodo para verificar se o price de uma ordem que foi alterada era o max/min de um ask ou bid dentro do userOrderrepository.
 
+  public ResponseEntity<?> deleteOrder(long id_stock) {
+    return null;
+  }
 }

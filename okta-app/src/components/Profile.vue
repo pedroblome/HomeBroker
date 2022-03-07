@@ -99,7 +99,7 @@
                 {{ stock.id_stock }}
               </td>
               <td
-                style="font-size: 17px; position:relative; left: 25px"
+                style="font-size: 17px; position: relative; left: 25px"
                 class="
                   px-6
                   py-3
@@ -115,7 +115,7 @@
                 }}</span>
               </td>
               <td
-                style="font-size: 17px; position:relative; left: -155px"
+                style="font-size: 17px; position: relative; left: -155px"
                 class="
                   px-6
                   py-3
@@ -159,8 +159,7 @@
           >
             Users Orders Open
           </caption>
-          <thead 
-          class="bg-gray-600 py-4">
+          <thead class="bg-gray-600 py-4">
             <tr>
               <th
                 style="width: 13px"
@@ -223,8 +222,7 @@
                 Volume
               </th>
               <th
-                style="width: 40px; position: relative; left:-60px"
-
+                style="width: 40px; position: relative; left: -60px"
                 scope="col"
                 class="
                   px-6
@@ -239,7 +237,7 @@
                 Price
               </th>
               <th
-                style="width: 40px;  position:relative; left:-50px"
+                style="width: 40px; position: relative; left: -50px"
                 scope="col"
                 class="
                   px-6
@@ -253,8 +251,8 @@
               >
                 Updated on
               </th>
-                <th
-                style="width: 40px;  position:relative; left:-40px"
+              <th
+                style="width: 40px; position: relative; left: -40px"
                 scope="col"
                 class="
                   px-6
@@ -269,7 +267,7 @@
                 Type
               </th>
               <th
-                style="width: 43px;  position:relative; left:-65px"
+                style="width: 43px; position: relative; left: -65px"
                 scope="col"
                 class="
                   px-6
@@ -321,7 +319,7 @@
                 }}</span>
               </td>
               <td
-                style="font-size:12px; position: relative; left:-48px"
+                style="font-size: 12px; position: relative; left: -48px"
                 class="
                   px-6
                   py-3
@@ -347,7 +345,7 @@
                 {{ stock.volume }} un.
               </td>
               <td
-                style="font-size: 17px;  position:relative; left:-53px"
+                style="font-size: 17px; position: relative; left: -53px"
                 class="
                   px-6
                   py-3
@@ -360,7 +358,7 @@
                 U${{ stock.price.toFixed(2) }}
               </td>
               <td
-                style="font-size: 12px;  position:relative; left:-60px"
+                style="font-size: 12px; position: relative; left: -60px"
                 class="
                   px-6
                   py-3
@@ -372,8 +370,8 @@
               >
                 {{ stock.updated_on }} un.
               </td>
-              <td 
-                style="font-size: 17px;  position:relative; left:-60px"
+              <td
+                style="font-size: 17px; position: relative; left: -60px"
                 class="
                   px-6
                   py-3
@@ -383,11 +381,11 @@
                   tracking-wider
                 "
               >
-              <label v-if="stock.type==1">buy</label>
-              <label v-if="stock.type==0">sell</label>
+                <label v-if="stock.type == 1">buy</label>
+                <label v-if="stock.type == 0">sell</label>
               </td>
               <td
-                style="font-size: 17px;  position:relative; left:-60px"
+                style="font-size: 17px; position: relative; left: -60px"
                 class="
                   px-6
                   py-3
@@ -500,11 +498,15 @@ export default {
           Authorization: "Bearer " + this.$auth.getAccessToken(),
         },
       })
+      
         .then((response) => {
-          console.log(response);
-          window.alert("Order Deleter with sucess");
-          console.log("ta chamando a função ao menos");
-          console.log(response.data);
+        
+      
+            console.log(response);
+            window.alert("Order Deleter with sucess");
+            console.log("ta chamando a função ao menos");
+            console.log(response.data);
+          
         })
         .catch(() => {
           console.log("error");
