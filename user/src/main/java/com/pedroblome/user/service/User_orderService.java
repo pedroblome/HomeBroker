@@ -127,16 +127,39 @@ public class User_orderService {
         "Cannot create order with type diferent of 1 or 0!!");
   }
 
-  public ResponseEntity<User_order> deleteOrder(@PathVariable Long order_id) {
+  public ResponseEntity<User_order> deleteOrder(@PathVariable("order_id") Long order_id, String token) {
 
-    // para mandar informações tabela stocks
+    User_order user_order = user_orderRepository.getById(order_id);
+    BigDecimal dollarBalanceUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
+    BigDecimal reversal = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getRemaing_volume()));
+    userRepository.getById(user_order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+    user_order.setStatus(0);
+    User_order orderDelete = user_orderRepository.save(user_order);
 
-    User_order order = user_orderRepository.getById(order_id);
-    BigDecimal dollarBalanceUser = userRepository.getById(order.getId_user()).getDollar_balance();
-    BigDecimal reversal = order.getPrice().multiply(BigDecimal.valueOf(order.getRemaing_volume()));
-    userRepository.getById(order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
-    order.setStatus(0);
-    User_order orderDelete = user_orderRepository.save(order);
+    try {
+
+      StockAskBidDto newAskBid = this.checkAskBid(user_order);
+      RestTemplate restTemplate = new RestTemplate();
+      URI uri;
+      uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
+      HttpHeaders headers = new HttpHeaders();
+
+      headers.set("Authorization", token);
+      headers.set("Content-Type", "application/json");
+
+      // (instancia,cabecalho)
+      HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
+
+      // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+      ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
+          uri,
+          HttpMethod.PUT,
+          requestEntity,
+          StockAskBidDto.class);
+
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
 
     return ResponseEntity.ok().body(orderDelete);
   }
@@ -170,6 +193,7 @@ public class User_orderService {
   }
 
   // consulta o body de um post order, name=id=symbol
+
   public Boolean checkStock(Stockdto stockdto, String token) {
     try {
 
