@@ -23,7 +23,7 @@
         class="bg-blue-200 hover:bg-green-200"
       />
       <div>
-        <table id="balanceStock" class="w-full table-auto" style="widht: 200px">
+        <table id="balanceStock" class="w-full table-auto " style="widht: 200px">
           <caption
             style="text-align: center; font-size: 29px; background-color: gray"
           >
@@ -140,7 +140,9 @@
         border-b border-red-10
         sm:rounded-lg
         bg-gray-300
+        
       "
+      style="margin-top:20px"
     >
       <input
         type="text"
@@ -285,7 +287,8 @@
           </thead>
         </table>
       </div>
-      <div class="w-full overflow-y-auto" style="height: 180px">
+      
+      <div class="w-full overflow-y-auto" style="height: 180px; padding-top: 20mm">
         <table id="userOrders" class="w-full table-auto">
           <thead class="bg-gray-300 py-5">
             <tr v-for="stock in filteredOrders" :key="stock.stock_id">

@@ -1,11 +1,15 @@
 package com.pedroblome.user.model;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -21,10 +25,21 @@ public class User {
     private BigDecimal dollar_balance;
     private boolean enabled;
     private Timestamp created_on;
-    private Timestamp updated_on;
+    private Timestamp updated_on;    
+    private boolean bot;
+ 
+
 
     public Long getId() {
         return id;
+    }
+
+    public boolean isBot() {
+        return bot;
+    }
+
+    public void setBot(boolean bot) {
+        this.bot = bot;
     }
 
     public void setId(Long id) {

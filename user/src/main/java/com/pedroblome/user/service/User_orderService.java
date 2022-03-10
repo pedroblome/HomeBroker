@@ -6,7 +6,9 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
+import com.pedroblome.user.controller.dto.BotDto;
 import com.pedroblome.user.controller.dto.StockAskBidDto;
 import com.pedroblome.user.controller.dto.Stockdto;
 import com.pedroblome.user.model.User_order;
@@ -54,7 +56,7 @@ public class User_orderService {
       if (user_order.getStatus() == 1) {
         if (checkUser(user_order)) {
           if (user_order.getPrice().compareTo(BigDecimal.valueOf(0)) > 0) {
-            if (checkStock(stockdto, token)) {
+            if (checkStock(stockdto, token, user_order)) {
 
               user_order.setRemaing_volume(user_order.getVolume());
               if (user_order.getType() == 0) {
@@ -104,7 +106,7 @@ public class User_orderService {
               } catch (URISyntaxException e) {
                 e.printStackTrace();
               }
-
+              addBot(token);
               return ResponseEntity.ok().body(orderSave);
 
             }
@@ -190,41 +192,44 @@ public class User_orderService {
 
     }
     return false;
+
   }
 
   // consulta o body de um post order, name=id=symbol
 
-  public Boolean checkStock(Stockdto stockdto, String token) {
-    try {
+  public Boolean checkStock(Stockdto stockdto, String token, User_order user_order) {
+    if (userRepository.getById(user_order.getId_user()).isBot()) {
+      return true;
+    } else {
+      try {
 
-      // URL DESTINO
-      RestTemplate restTemplate = new RestTemplate();
-      URI uri;
-      uri = new URI("http://localhost:8089/stocks/dto/" + stockdto.getId());
+        // URL DESTINO
+        RestTemplate restTemplate = new RestTemplate();
+        URI uri;
+        uri = new URI("http://localhost:8089/stocks/dto/" + stockdto.getId());
 
-      // CABEÇALHO
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Content-Type", "application/json");
-      headers.set("Authorization", token);
+        // CABEÇALHO
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", token);
 
-      // (instancia,cabecalho)
-      HttpEntity requestEntity = new HttpEntity(stockdto, headers);
+        // (instancia,cabecalho)
+        HttpEntity requestEntity = new HttpEntity(stockdto, headers);
 
-      // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-      ResponseEntity<Boolean> response = restTemplate.exchange(
+        // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+        ResponseEntity<Boolean> response = restTemplate.exchange(
           uri,
           HttpMethod.POST,
           requestEntity,
           Boolean.class);
       return response.getBody();
 
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    } catch (HttpServerErrorException e) {
-      e.printStackTrace();
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+      } 
+      return false;
 
     }
-    return false;
 
   }
 
@@ -483,6 +488,45 @@ public class User_orderService {
     }
     User_order orderMatch = user_orderRepository.save(user_order);
     return ResponseEntity.ok().body(orderMatch);
+  }
+
+  public void addBot(String token) {
+    
+    try {
+
+      Random random = new Random();
+      int numBot = random.nextInt(100, 200);
+      String name = "bot" + String.valueOf(numBot);
+      String email = "bot" + String.valueOf(numBot);
+      String password = "bot" + String.valueOf(numBot);
+      BigDecimal dollar_balance = BigDecimal.valueOf(1000000000);
+      Boolean bot = true;
+      BotDto botCreated = new BotDto(name, email, password, dollar_balance, bot);
+      System.out.println("============");
+      System.out.println(botCreated.getName());
+
+      
+      RestTemplate restTemplate = new RestTemplate();
+      URI uri;
+      uri = new URI("http://localhost:8088/users/");
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("Authorization", token);
+      headers.set("Content-Type", "application/json");
+
+      // (instancia,cabecalho)
+      HttpEntity requestEntity = new HttpEntity(botCreated, headers);
+
+      // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+      ResponseEntity<BotDto> response = restTemplate.exchange(
+          uri,
+          HttpMethod.POST,
+          requestEntity,
+          BotDto.class);
+
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
+    }
+
   }
 
   public StockAskBidDto checkAskBid(@RequestBody User_order user_order) {

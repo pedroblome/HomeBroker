@@ -2,6 +2,7 @@ package com.pedroblome.user.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import com.pedroblome.user.controller.dto.AppendDto;
 import com.pedroblome.user.model.User;
@@ -34,6 +35,14 @@ public class UserController {
    
     @GetMapping
     public List<User> getAll(){
+
+        Random gerador = new Random();
+        System.out.println("teste123");
+        System.out.println("teste123");
+        System.out.println("teste123");
+        System.out.println("teste123");
+        System.out.println("teste123");
+        System.out.println("teste123");
         return userRepository.findAll();
     
     }

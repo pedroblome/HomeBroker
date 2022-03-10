@@ -13,6 +13,7 @@ export default{
 }
 </script>
 <style >
-
-
+body {
+    zoom: 1.5 /* Coloca o zoom em 200% */
+}
 </style>

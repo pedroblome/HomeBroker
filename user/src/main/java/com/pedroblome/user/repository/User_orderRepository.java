@@ -32,8 +32,10 @@ public interface User_orderRepository extends JpaRepository<User_order, Long> {
 
     @Query(value = " SELECT CASE WHEN EXISTS(SELECT * from public.user_order where id_stock = ?1 and status = 1 and type = 1 ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ", nativeQuery = true)
     Boolean orderStockBuy(Long id_stock);
-   
-
+    
+    
+    @Query(value = " SELECT CASE WHEN EXISTS(SELECT * from public.user_order where id_stock = ?1 and status = 1 and bot = true ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END ", nativeQuery = true)
+    Boolean sevenOrMoreOrdersBot(Long id_stock);
 
     @Query(value = "select * from public.user_order where type = 0 and id_stock= ?1 and status = 1 and id_user != ?2 and  remaing_volume>0 order by created_on", nativeQuery = true)
     List<User_order> listSell(Long id_stock, Long id_user);

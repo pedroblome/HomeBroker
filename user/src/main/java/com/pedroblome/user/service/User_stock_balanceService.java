@@ -9,9 +9,5 @@ public class User_stock_balanceService {
     @Autowired
     public User_stock_balanceRepository user_stock_balanceRepository;
 
-  
-
-
-   
 
 }
