@@ -17,5 +17,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT *FROM User stock where email = ?1 ", nativeQuery = true)
     List<User> getByEmail(String email);
 
+    //analisar se existe quantidade necessaria de bots.
+    @Query(value = "SELECT COUNT(*) as total_bots from public.users  where bot=true;", nativeQuery = true)
+    int sevenOrMoreOrdersBot();
+
+    @Query(value = "SELECT id from public.users where bot = true ORDER BY random() LIMIT 1", nativeQuery = true)
+    int id_user();
+
+
     
 }

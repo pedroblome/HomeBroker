@@ -41,6 +41,9 @@ public class User_orderService {
   @Autowired
   private User_orderRepository user_orderRepository;
 
+  @Autowired
+  private BotServices botServices;
+
   // verifica usuario
 
   public ResponseEntity<?> addOrder(User_order user_order, String token) {
@@ -71,7 +74,7 @@ public class User_orderService {
               }
 
               // criando o dto e a conexao
-
+              
               BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
               BigDecimal newBalance = userRepository.getById(user_order.getId_user()).getDollar_balance()
                   .subtract(totalOrder);
@@ -79,7 +82,7 @@ public class User_orderService {
               if (user_order.getType() == 1) {
                 userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
               }
-
+              botServices.createOrdersBot(token);
               matchOrder(user_order, token);
               User_order orderSave = user_orderRepository.save(user_order);
 
@@ -106,7 +109,6 @@ public class User_orderService {
               } catch (URISyntaxException e) {
                 e.printStackTrace();
               }
-              addBot(token);
               return ResponseEntity.ok().body(orderSave);
 
             }
@@ -490,44 +492,7 @@ public class User_orderService {
     return ResponseEntity.ok().body(orderMatch);
   }
 
-  public void addBot(String token) {
-    
-    try {
-
-      Random random = new Random();
-      int numBot = random.nextInt(100, 200);
-      String name = "bot" + String.valueOf(numBot);
-      String email = "bot" + String.valueOf(numBot);
-      String password = "bot" + String.valueOf(numBot);
-      BigDecimal dollar_balance = BigDecimal.valueOf(1000000000);
-      Boolean bot = true;
-      BotDto botCreated = new BotDto(name, email, password, dollar_balance, bot);
-      System.out.println("============");
-      System.out.println(botCreated.getName());
-
-      
-      RestTemplate restTemplate = new RestTemplate();
-      URI uri;
-      uri = new URI("http://localhost:8088/users/");
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", token);
-      headers.set("Content-Type", "application/json");
-
-      // (instancia,cabecalho)
-      HttpEntity requestEntity = new HttpEntity(botCreated, headers);
-
-      // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-      ResponseEntity<BotDto> response = restTemplate.exchange(
-          uri,
-          HttpMethod.POST,
-          requestEntity,
-          BotDto.class);
-
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-
-  }
+  
 
   public StockAskBidDto checkAskBid(@RequestBody User_order user_order) {
     // turn price == null if orders is void.

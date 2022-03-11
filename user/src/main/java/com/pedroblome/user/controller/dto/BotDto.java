@@ -9,6 +9,10 @@ public class BotDto {
     private BigDecimal dollar_balance;
     private Boolean bot;
 
+    public BotDto(){
+        
+    }
+
     public String getName() {
         return name;
     }
