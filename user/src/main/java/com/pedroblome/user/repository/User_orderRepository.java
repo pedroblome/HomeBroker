@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import com.pedroblome.user.model.User_order;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -38,6 +39,7 @@ public interface User_orderRepository extends JpaRepository<User_order, Long> {
 
     @Query(value = "select * from public.user_order where type = 0 and id_stock= ?1 and status = 1 and id_user != ?2 and  remaing_volume>0 order by created_on", nativeQuery = true)
     List<User_order> listSell(Long id_stock, Long id_user);
+
 
     @Query(value = "select * from public.user_order where type = 1 and id_stock= ?1 and status = 1 and id_user != ?2 and remaing_volume>0 order by created_on", nativeQuery = true)
     List<User_order> listBuy(Long id_stock, Long id_user);

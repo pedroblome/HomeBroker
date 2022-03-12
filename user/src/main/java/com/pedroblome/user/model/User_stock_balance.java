@@ -22,6 +22,7 @@ public class User_stock_balance {
     private Integer volume;
     private Timestamp created_on;
     private Timestamp updated_on;
+    
 
     public Long getId_user() {
         return id_user;
@@ -92,9 +93,6 @@ public class User_stock_balance {
         this.volume = volume;
     }
 
-    // public User_stock_balance(Integer remaingVolume) {
-    //     this.remaingVolume = remaingVolume;
-    // }
 
     public User_stock_balance(Integer volume) {
         this.volume=volume;

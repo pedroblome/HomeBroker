@@ -74,7 +74,7 @@ public class User_orderService {
               }
 
               // criando o dto e a conexao
-              
+
               BigDecimal totalOrder = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getVolume()));
               BigDecimal newBalance = userRepository.getById(user_order.getId_user()).getDollar_balance()
                   .subtract(totalOrder);
@@ -82,9 +82,9 @@ public class User_orderService {
               if (user_order.getType() == 1) {
                 userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
               }
-              botServices.createOrdersBot(token);
-              matchOrder(user_order, token);
+              // botServices.createOrdersBot(token);
               User_order orderSave = user_orderRepository.save(user_order);
+              matchOrder(user_order, token);
 
               try {
 
@@ -220,15 +220,15 @@ public class User_orderService {
 
         // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
         ResponseEntity<Boolean> response = restTemplate.exchange(
-          uri,
-          HttpMethod.POST,
-          requestEntity,
-          Boolean.class);
-      return response.getBody();
+            uri,
+            HttpMethod.POST,
+            requestEntity,
+            Boolean.class);
+        return response.getBody();
 
       } catch (URISyntaxException e) {
         e.printStackTrace();
-      } 
+      }
       return false;
 
     }
@@ -236,263 +236,202 @@ public class User_orderService {
   }
 
   public ResponseEntity<?> matchOrder(@RequestBody User_order user_order, String token) {
+    List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(), user_order.getId_user());
+    List<User_order> orderBuy = user_orderRepository.listBuy(user_order.getId_stock(), user_order.getId_user());
 
-    List<User_order> orderSell = user_orderRepository.listSell(user_order.getId_stock(),
-        user_order.getId_user());
-    List<User_order> orderBuy = user_orderRepository.listBuy(user_order.getId_stock(),
-        user_order.getId_user());
+    // user_order és o vendedor
+    if (user_order.getType() == 0) {// vendedor é User_order logo, comprador = buyOrder
+      for (User_order buyOrder : orderBuy) {
 
-    if (user_order.getType() == 1) {// percorras as listas de vendas
-      for (User_order sellOrders : orderSell) {
-        Integer buyerVolume = sellOrders.getRemaing_volume();
-        Integer sellerVolume = user_order.getRemaing_volume();
+        if (user_order.getPrice().compareTo(buyOrder.getPrice()) < 0 || user_order.getPrice().compareTo(buyOrder.getPrice()) == 0) {
 
-        Integer setVolume;
-        if (sellerVolume >= buyerVolume) {
-          setVolume = buyerVolume;
-        } else {
-          setVolume = sellerVolume;
-        }
-
-        // dolar Ballance do dono de cada order envolvida
-        BigDecimal dollarBalanceBuyer = userRepository.getById(user_order.getId_user()).getDollar_balance();
-        BigDecimal dollarBalanceSeller = userRepository.getById(sellOrders.getId_user()).getDollar_balance();
-        BigDecimal dollarOrderTotal = sellOrders.getPrice().multiply(BigDecimal.valueOf(setVolume));
-        BigDecimal dollarDiff = user_order.getPrice().subtract(sellOrders.getPrice());
-        BigDecimal newDollarDiff = dollarDiff.multiply(BigDecimal.valueOf(setVolume));
-
-        LocalDateTime now = LocalDateTime.now();
-        Timestamp timestamp = Timestamp.valueOf(now);
-
-        if (sellerVolume >= buyerVolume) {
-          setVolume = buyerVolume;
-        } else {
-          setVolume = sellerVolume;
-        }
-
-        if (sellOrders.getPrice().compareTo(user_order.getPrice()) <= 0) {
-
-          user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
-          sellOrders.setRemaing_volume(sellOrders.getRemaing_volume() - setVolume);
-
-          if (user_order.getRemaing_volume() == 0) {
-            user_order.closeOrder();
-            if (user_order.getRemaing_volume() == 0) {
-              user_order.closeOrder();
-              try {
-
-                StockAskBidDto newAskBid = this.checkAskBid(user_order);
-                RestTemplate restTemplate = new RestTemplate();
-                URI uri;
-                uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", token);
-                headers.set("Content-Type", "application/json");
-
-                // (instancia,cabecalho)
-                HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
-
-                // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-                ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
-                    uri,
-                    HttpMethod.PUT,
-                    requestEntity,
-                    StockAskBidDto.class);
-
-              } catch (URISyntaxException e) {
-                e.printStackTrace();
-              }
-
-            }
-            if (sellOrders.getRemaing_volume() == 0) {
-              sellOrders.closeOrder();
-
-              if (user_order.getRemaing_volume() == 0) {
-                user_order.closeOrder();
-                try {
-
-                  StockAskBidDto newAskBid = this.checkAskBid(user_order);
-                  RestTemplate restTemplate = new RestTemplate();
-                  URI uri;
-                  uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
-                  HttpHeaders headers = new HttpHeaders();
-                  headers.set("Authorization", token);
-                  headers.set("Content-Type", "application/json");
-
-                  // (instancia,cabecalho)
-                  HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
-
-                  // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-                  ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
-                      uri,
-                      HttpMethod.PUT,
-                      requestEntity,
-                      StockAskBidDto.class);
-
-                } catch (URISyntaxException e) {
-                  e.printStackTrace();
-                }
-
-              }
-              // att o dollar balance comprador e vendedor.
-              userRepository.getById(sellOrders.getId_user())
-                  .setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
-              if (user_order.getPrice().compareTo(sellOrders.getPrice()) >= 0) {
-                userRepository.getById(user_order.getId_stock())
-                    .setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
-              }
-
-              user_order.setUpdated_on(timestamp);
-              sellOrders.setUpdated_on(timestamp);
-              userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
-              userRepository.getById(sellOrders.getId_user()).setUpdated_on(timestamp);
-
-              // att o stockBallance do comprador--> user_order
-              try {
-                Integer updateVolumeStock = user_stock_balanceRepository
-                    .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
-
-                user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
-                    .setVolume(updateVolumeStock);
-
-              } catch (NullPointerException e) {
-                user_stock_balanceRepository.createStockBalance(user_order.getId_stock(), user_order.getId_user(),
-                    user_order.getUpdated_on(),
-                    user_order.getStock_name(), user_order.getStock_symbol(), user_order.getUpdated_on(), setVolume);
-              }
-
-            } else {
-              System.out.println("ordem cadastrada nao rendeu nenhum match");
-            }
-
-          }
-        }
-      }
-      if (user_order.getType() == 0) {// percorras as listas de compras.
-        for (User_order buyOrder : orderBuy) {
-          Integer buyerVolume = buyOrder.getRemaing_volume();
-          Integer sellerVolume = user_order.getRemaing_volume();
-
-          Integer setVolume;
+          int buyerVolume = buyOrder.getRemaing_volume();
+          int sellerVolume = user_order.getRemaing_volume();
+          int setVolume;
           if (buyerVolume >= sellerVolume) {
             setVolume = sellerVolume;
           } else {
             setVolume = buyerVolume;
           }
-
-          // dolar Ballance do dono de cada order envolvida
-          BigDecimal dollarBalanceBuyer = userRepository.getById(buyOrder.getId_user()).getDollar_balance();
-          BigDecimal dollarBalanceSeller = userRepository.getById(user_order.getId_user()).getDollar_balance();
-          BigDecimal dollarOrderTotal = user_order.getPrice().multiply(BigDecimal.valueOf(setVolume));
-          BigDecimal dollarDiff = buyOrder.getPrice().subtract(user_order.getPrice());
-          BigDecimal newDollarDiff = dollarDiff.multiply(BigDecimal.valueOf(setVolume));
-
           LocalDateTime now = LocalDateTime.now();
           Timestamp timestamp = Timestamp.valueOf(now);
 
+          BigDecimal dollarBalanceBuyer = userRepository.getById(buyOrder.getId_user()).getDollar_balance();
+          BigDecimal dollarBalanceSeller = userRepository.getById(user_order.getId_user()).getDollar_balance();
+          BigDecimal dollarOrderTotal = user_order.getPrice().multiply(BigDecimal.valueOf(setVolume));
+          BigDecimal reversal = buyOrder.getPrice().subtract(user_order.getPrice())
+              .multiply(BigDecimal.valueOf(setVolume));
+
+          user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
+          buyOrder.setRemaing_volume(buyOrder.getRemaing_volume() - setVolume);
+          user_order.setUpdated_on(timestamp);
+          buyOrder.setUpdated_on(timestamp);
+
+          userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
+          userRepository.getById(buyOrder.getId_user()).setUpdated_on(timestamp);
+
+          user_orderRepository.getById(user_order.getId()).setUpdated_on(timestamp);
+          user_orderRepository.getById(buyOrder.getId()).setUpdated_on(timestamp);
+
+          
+
+          // dollar balance vendedor
+          userRepository.getById(user_order.getId_user())
+              .setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
+
+          if (buyOrder.getPrice().compareTo(user_order.getPrice()) > 0) {
+            userRepository.getById(buyOrder.getId_user())
+                .setDollar_balance(dollarBalanceBuyer.add(reversal));
+          }
+          if (user_order.getRemaing_volume() == 0) {
+            user_order.closeOrder();
+          }
+          if (buyOrder.getRemaing_volume() == 0) {
+            buyOrder.closeOrder();
+          }
+          try {
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(),
+              user_order.getId_stock())
+              .setUpdated_on(timestamp);
+          user_stock_balanceRepository.findByUserStock(buyOrder.getId_user(),
+              buyOrder.getId_stock())
+              .setUpdated_on(timestamp);
+            Integer updateVolumeStock = user_stock_balanceRepository
+                .findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock()).getVolume() + setVolume;
+
+            user_stock_balanceRepository.findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock())
+                .setVolume(updateVolumeStock);
+
+          } catch (NullPointerException e) {
+            // cria carteira caso o comprador n tenha
+            user_stock_balanceRepository.createStockBalance(buyOrder.getId_stock(), buyOrder.getId_user(),
+                buyOrder.getUpdated_on(),
+                buyOrder.getStock_name(), buyOrder.getStock_symbol(), buyOrder.getUpdated_on(), setVolume);
+          }
+          try {
+
+            StockAskBidDto newAskBid = this.checkAskBid(user_order);
+            RestTemplate restTemplate = new RestTemplate();
+            URI uri;
+            uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", token);
+            headers.set("Content-Type", "application/json");
+
+            // (instancia,cabecalho)
+            HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
+
+            // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+            ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
+                uri,
+                HttpMethod.PUT,
+                requestEntity,
+                StockAskBidDto.class);
+
+          } catch (URISyntaxException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    else {// vendedor é sellOrder, comprador user_Order.
+      for (User_order sellOrder : orderSell) {
+        if (sellOrder.getPrice().compareTo(user_order.getPrice()) < 0 || sellOrder.getPrice().compareTo(user_order.getPrice()) == 0) {
+
+          int buyerVolume = user_order.getRemaing_volume();
+          int sellerVolume = sellOrder.getRemaing_volume();
+          int setVolume;
           if (buyerVolume >= sellerVolume) {
             setVolume = sellerVolume;
           } else {
             setVolume = buyerVolume;
           }
+          LocalDateTime now = LocalDateTime.now();
+          Timestamp timestamp = Timestamp.valueOf(now);
 
-          if (user_order.getPrice().compareTo(buyOrder.getPrice()) <= 0) {
+          BigDecimal dollarBalanceBuyer = userRepository.getById(user_order.getId_user()).getDollar_balance();
+          BigDecimal dollarBalanceSeller = userRepository.getById(sellOrder.getId_user()).getDollar_balance();
+          BigDecimal dollarOrderTotal = sellOrder.getPrice().multiply(BigDecimal.valueOf(setVolume));
+          BigDecimal reversal = sellOrder.getPrice().subtract(user_order.getPrice())
+              .multiply(BigDecimal.valueOf(setVolume));
 
-            user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
-            buyOrder.setRemaing_volume(buyOrder.getRemaing_volume() - setVolume);
+          user_order.setRemaing_volume(user_order.getRemaing_volume() - setVolume);
+          sellOrder.setRemaing_volume(sellOrder.getRemaing_volume() - setVolume);
+          user_order.setUpdated_on(timestamp);
+          sellOrder.setUpdated_on(timestamp);
 
-            if (user_order.getRemaing_volume() == 0) {
-              user_order.closeOrder();
-              try {
+          userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
+          userRepository.getById(sellOrder.getId_user()).setUpdated_on(timestamp);
 
-                StockAskBidDto newAskBid = this.checkAskBid(user_order);
-                RestTemplate restTemplate = new RestTemplate();
-                URI uri;
-                uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", token);
-                headers.set("Content-Type", "application/json");
+          user_orderRepository.getById(user_order.getId()).setUpdated_on(timestamp);
+          user_orderRepository.getById(sellOrder.getId()).setUpdated_on(timestamp);
 
-                // (instancia,cabecalho)
-                HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
+         
+          // dollar balance do vendedor
+          userRepository.getById(sellOrder.getId_user())
+              .setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
 
-                // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-                ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
-                    uri,
-                    HttpMethod.PUT,
-                    requestEntity,
-                    StockAskBidDto.class);
-
-              } catch (URISyntaxException e) {
-                e.printStackTrace();
-              }
-            }
-            if (buyOrder.getRemaing_volume() == 0) {
-              buyOrder.closeOrder();
-              try {
-
-                StockAskBidDto newAskBid = this.checkAskBid(user_order);
-                RestTemplate restTemplate = new RestTemplate();
-                URI uri;
-                uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", token);
-                headers.set("Content-Type", "application/json");
-
-                // (instancia,cabecalho)
-                HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
-
-                // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-                ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
-                    uri,
-                    HttpMethod.PUT,
-                    requestEntity,
-                    StockAskBidDto.class);
-
-              } catch (URISyntaxException e) {
-                e.printStackTrace();
-              }
-            }
-            // att o dollar balance do vendedor
-            userRepository.getById(user_order.getId_user())
-                .setDollar_balance(dollarBalanceSeller.add(dollarOrderTotal));
-            if (buyOrder.getPrice().compareTo(user_order.getPrice()) >= 0) {
-              userRepository.getById(buyOrder.getId_user()).setDollar_balance(dollarBalanceBuyer.add(newDollarDiff));
-            }
-
-            user_order.setUpdated_on(timestamp);
-            buyOrder.setUpdated_on(timestamp);
-            userRepository.getById(user_order.getId_user()).setUpdated_on(timestamp);
-            userRepository.getById(buyOrder.getId_user()).setUpdated_on(timestamp);
-
-            // att o stockBallance do comprador --> buyerOrder
-            try {
-              Integer updateVolumeStock = user_stock_balanceRepository
-                  .findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock()).getVolume() + setVolume;
-
-              user_stock_balanceRepository.findByUserStock(buyOrder.getId_user(), buyOrder.getId_stock())
-                  .setVolume(updateVolumeStock);
-
-            } catch (NullPointerException e) {
-              user_stock_balanceRepository.createStockBalance(buyOrder.getId_stock(), buyOrder.getId_user(),
-                  buyOrder.getUpdated_on(),
-                  buyOrder.getStock_name(), buyOrder.getStock_symbol(), buyOrder.getUpdated_on(), setVolume);
-
-            }
-
-          } else {
-            System.out.println("ordem cadastrada nao rendeu nenhum match");
+          if (sellOrder.getPrice().compareTo(user_order.getPrice()) < 0) {
+            userRepository.getById(sellOrder.getId_user())
+                .setDollar_balance(dollarBalanceBuyer.add(reversal));
           }
 
+          if (user_order.getRemaing_volume() == 0) {
+            user_order.closeOrder();
+          }
+          if (sellOrder.getRemaing_volume() == 0) {
+            sellOrder.closeOrder();
+          }
+          try {
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(),
+            user_order.getId_stock())
+            .setUpdated_on(timestamp);
+        user_stock_balanceRepository.findByUserStock(sellOrder.getId_user(),
+            sellOrder.getId_stock())
+            .setUpdated_on(timestamp);
+            Integer updateVolumeStock = user_stock_balanceRepository
+                .findByUserStock(user_order.getId_user(), user_order.getId_stock()).getVolume() + setVolume;
+
+            user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+                .setVolume(updateVolumeStock);
+
+          } catch (NullPointerException e) {
+            user_stock_balanceRepository.createStockBalance(user_order.getId_stock(), user_order.getId_user(),
+                user_order.getUpdated_on(),
+                user_order.getStock_name(), user_order.getStock_symbol(), user_order.getUpdated_on(), setVolume);
+          }
+
+          try {
+
+            StockAskBidDto newAskBid = this.checkAskBid(user_order);
+            RestTemplate restTemplate = new RestTemplate();
+            URI uri;
+            uri = new URI("http://localhost:8089/stocks/askbid/" + user_order.getId_stock());
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", token);
+            headers.set("Content-Type", "application/json");
+
+            // (instancia,cabecalho)
+            HttpEntity requestEntity = new HttpEntity(newAskBid, headers);
+
+            // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+            ResponseEntity<StockAskBidDto> response = restTemplate.exchange(
+                uri,
+                HttpMethod.PUT,
+                requestEntity,
+                StockAskBidDto.class);
+
+          } catch (URISyntaxException e) {
+            e.printStackTrace();
+          }
         }
       }
-
     }
+
     User_order orderMatch = user_orderRepository.save(user_order);
     return ResponseEntity.ok().body(orderMatch);
-  }
 
-  
+  }
 
   public StockAskBidDto checkAskBid(@RequestBody User_order user_order) {
     // turn price == null if orders is void.

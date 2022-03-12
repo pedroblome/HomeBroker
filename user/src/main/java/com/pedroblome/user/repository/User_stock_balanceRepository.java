@@ -27,6 +27,9 @@ public interface User_stock_balanceRepository extends JpaRepository<User_stock_b
     User_stock_balance createStockBalance(long id_stock, long id_user,Timestamp created_on, String stock_name, String stock_symbol, Timestamp updated_on, Integer volume);
     //cria stock ballance com volume = 0
 
+
+
+
     // @Query(value = "INSERT INTO public.user_stock_balance  (id_stock, id_user, created_on, stock_name, stock_symbol, updated_on, volume)  VALUES(:id_stock, :id_use, :created_on, :stock_name, :stock_symbol, :updated_on, :volume)", nativeQuery = true)
     // User_stock_balance createStockBalance(long id_stock, long id_user,Timestamp created_on, String stock_name, String stock_symbol, Timestamp updated_on, Integer volume);
     
