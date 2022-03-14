@@ -25,10 +25,8 @@ public class User {
     private BigDecimal dollar_balance;
     private boolean enabled;
     private Timestamp created_on;
-    private Timestamp updated_on;    
+    private Timestamp updated_on;
     private boolean bot;
- 
-
 
     public Long getId() {
         return id;
@@ -53,6 +51,7 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
+
     public String getEmail() {
         return email;
     }

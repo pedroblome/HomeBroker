@@ -1,6 +1,5 @@
 package com.pedroblome.user.controller.dto;
 
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

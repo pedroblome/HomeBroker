@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @CrossOrigin
 @RestController
 @RequestMapping("/users")
@@ -32,43 +33,34 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-   
     @GetMapping
-    public List<User> getAll(){
+    public List<User> getAll() {
 
-        Random gerador = new Random();
-        System.out.println("teste123");
-        System.out.println("teste123");
-        System.out.println("teste123");
-        System.out.println("teste123");
-        System.out.println("teste123");
-        System.out.println("teste123");
         return userRepository.findAll();
-    
+
     }
+
     @GetMapping(value = "/{id}")
     public Optional<User> searchStock(@PathVariable Long id) {
         return userRepository.findById(id);
     }
-  
+
     @PostMapping
-    public ResponseEntity<?> add(@RequestBody User user){
+    public ResponseEntity<?> add(@RequestBody User user) {
         User addUser = userRepository.save(user);
         return new ResponseEntity<User>(addUser, HttpStatus.CREATED);
     }
 
     @PutMapping("/deposit")
-    public ResponseEntity<?> depositUser(@RequestBody AppendDto appendDto){
-       return userService.depositUser(appendDto);
+    public ResponseEntity<?> depositUser(@RequestBody AppendDto appendDto) {
+        return userService.depositUser(appendDto);
     }
- 
-    
+
     @DeleteMapping(value = "/{id}")
     public void deleteUser(@PathVariable Long id) throws Exception {
         userRepository.deleteById(id);
         new ResponseEntity<>("user Deleted", HttpStatus.OK);
-     
+
     }
-  
-   
+
 }

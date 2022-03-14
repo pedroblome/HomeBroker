@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     int sevenOrMoreOrdersBot();
 
     @Query(value = "SELECT id from public.users where bot = true ORDER BY random() LIMIT 1", nativeQuery = true)
-    int id_user();
+    int randomBot();
 
 
     
