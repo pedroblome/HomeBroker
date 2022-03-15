@@ -134,37 +134,37 @@ public class BotServices {
                     }
 
                 }
-                // else {
-                // BigDecimal price = BigDecimal.valueOf(random.nextDouble(12, 15.5));
-                // userRepository.getById(id_user)
-                // .setDollar_balance(price.multiply(BigDecimal.valueOf(volume)));
-                // OrderCreateDto orderCreateDto = new OrderCreateDto(id_user, id_stock, price,
-                // volume, status,
-                // type, stock_name, stock_symbol);
-                // try {
-                // System.out.println("chegando aqui");
-                // RestTemplate restTemplateOrder = new RestTemplate();
-                // URI uriOrder;
-                // uriOrder = new URI("http://localhost:8088/users_order");
-                // HttpHeaders headersOrder = new HttpHeaders();
-                // headersOrder.set("Authorization", token);
-                // headersOrder.set("Content-Type", "application/json");
+                else {
+                BigDecimal price = BigDecimal.valueOf(random.nextDouble(12, 15.5));
+                userRepository.getById(id_user)
+                .setDollar_balance(price.multiply(BigDecimal.valueOf(volume)));
+                OrderCreateDto orderCreateDto = new OrderCreateDto(id_user, id_stock, price,
+                volume, status,
+                type, stock_name, stock_symbol);
+                try {
+                System.out.println("chegando aqui");
+                RestTemplate restTemplateOrder = new RestTemplate();
+                URI uriOrder;
+                uriOrder = new URI("http://localhost:8088/users_order");
+                HttpHeaders headersOrder = new HttpHeaders();
+                headersOrder.set("Authorization", token);
+                headersOrder.set("Content-Type", "application/json");
 
-                // // (instancia,cabecalho)
-                // HttpEntity requestEntityOrder = new HttpEntity(orderCreateDto, headersOrder);
+                // (instancia,cabecalho)
+                HttpEntity requestEntityOrder = new HttpEntity(orderCreateDto, headersOrder);
 
-                // // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
-                // ResponseEntity<OrderCreateDto> responseOrder = restTemplateOrder.exchange(
-                // uriOrder,
-                // HttpMethod.POST,
-                // requestEntityOrder,
-                // OrderCreateDto.class);
-                // System.out.println(responseOrder.getBody());
+                // HttpMethod.PUT , HttpMethod.POST , HttpMethod.GET
+                ResponseEntity<OrderCreateDto> responseOrder = restTemplateOrder.exchange(
+                uriOrder,
+                HttpMethod.POST,
+                requestEntityOrder,
+                OrderCreateDto.class);
+                System.out.println(responseOrder.getBody());
 
-                // } catch (URISyntaxException e) {
-                // e.printStackTrace();
-                // }
-                // }
+                } catch (URISyntaxException e) {
+                e.printStackTrace();
+                }
+                }
 
             } catch (URISyntaxException e) {
                 e.printStackTrace();
