@@ -1,4 +1,4 @@
-name: Build
+name: Buildhttps://github.com/pedroblome/HomeBroker/blob/master/user/.github/workflows/build.yml
 on:
   push:
     branches:
@@ -33,4 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=pedroblome_HomeBroker_okta-app -DskipTests
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=pedroblome_HomeBroker_user -DskipTests
