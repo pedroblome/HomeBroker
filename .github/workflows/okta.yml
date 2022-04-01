@@ -2,18 +2,20 @@ name: okta
 on:
   push:
     paths:
-      - 'okta-app/**'
+      - 'okta/**'
+      - '.github/workflows/**'
     branches:
       - master
 
   pull_request:
     paths:
-      - 'okta-app/**'
+      - 'okta/**'
+      - '.github/workflows/**'
     types:
       - opened
       - synchronize
       - reopened
-  
+
 jobs:
   sonarcloud: 
     runs-on: ubuntu-latest
@@ -24,7 +26,7 @@ jobs:
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       with:
-        projectBaseDir: okta-app
+        projectBaseDir: okta
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_OKTA }}
