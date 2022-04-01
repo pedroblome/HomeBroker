@@ -2,13 +2,13 @@ name: okta
 on:
   push:
     paths:
-      - 'okta/**'
+      - 'okta-app/**'
     branches:
       - master
 
   pull_request:
     paths:
-      - 'okta/**'
+      - 'okta-app/**'
     types:
       - opened
       - synchronize
@@ -24,7 +24,7 @@ jobs:
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       with:
-        projectBaseDir: okta
+        projectBaseDir: okta-app
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_OKTA }}
