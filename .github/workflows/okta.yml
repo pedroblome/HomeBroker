@@ -1,4 +1,4 @@
-name: Okta
+name: okta
 on:
   push:
     paths: 
@@ -11,7 +11,10 @@ on:
      paths: 
      - 'okta/**'
      - '.github/workflows/**'
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
 jobs:
   sonarcloud:
     name: SonarCloud
