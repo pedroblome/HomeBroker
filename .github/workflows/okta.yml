@@ -3,14 +3,12 @@ on:
   push:
     paths:
       - 'okta/**'
-      - '.github/workflows/**'
     branches:
       - master
 
   pull_request:
     paths:
       - 'okta/**'
-      - '.github/workflows/**'
     types:
       - opened
       - synchronize
