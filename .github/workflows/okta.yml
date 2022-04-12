@@ -1,4 +1,4 @@
-name: Build
+name: okta
 on:
   push:
     branches:
