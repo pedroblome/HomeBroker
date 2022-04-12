@@ -1,13 +1,13 @@
 name: user
 on:
   push:
- 
     branches:
-    - master 
-    paths:
-    -  'user/'
+    - master
+     paths: 
+     - 'user/'
   pull_request:
     types: [opened, synchronize, reopened]
+    workflow_dispatch:
 jobs:
   build:
     name: Build
