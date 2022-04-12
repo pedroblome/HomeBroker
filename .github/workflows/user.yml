@@ -1,13 +1,15 @@
 name: user
+
 on:
   push:
     branches:
     - master
-     paths: 
-     - 'user/'
+    paths:
+    - 'user/'
   pull_request:
     types: [opened, synchronize, reopened]
-    workflow_dispatch:
+  workflow_dispatch:
+
 jobs:
   build:
     name: Build
@@ -20,20 +22,21 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
       - name: Build and analyze
         run: mvn -f user/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_USER }}
