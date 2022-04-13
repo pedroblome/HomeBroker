@@ -1,4 +1,4 @@
-name: stocks
+name: Build
 on:
   push:
     branches:
@@ -7,7 +7,6 @@ on:
       - 'stocks/'
   pull_request:
     types: [opened, synchronize, reopened]
-  workflow_dispatch:
 jobs:
   build:
     name: Build
@@ -36,3 +35,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STOCKS }}
+        run: mvn -f stocks/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
