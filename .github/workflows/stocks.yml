@@ -5,7 +5,7 @@ on:
     - master
     - development
     - pedroblome-patch-1
-    pahs:
+    paths:
     - 'stocks/'
   pull_request:
     types: [opened, synchronize, reopened]
