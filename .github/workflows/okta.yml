@@ -4,7 +4,7 @@ on:
     branches:
       - master
     paths: 
-    - 'okta-app/**'
+    - 'okta-app/'
       
   pull_request:
     types: [opened, synchronize, reopened]
