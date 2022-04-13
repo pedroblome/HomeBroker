@@ -21,7 +21,7 @@ public class StockDto {
         this.bid_max = bid_max;
         this.updated_on = updated_on;
     }
-    //testando sonarCloud
+
     public long getId() {
         return id;
     }
