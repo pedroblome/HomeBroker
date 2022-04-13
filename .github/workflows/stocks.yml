@@ -3,7 +3,9 @@ on:
   push:
     branches:
     - master
-    path:
+    - development
+    - pedroblome-patch-1
+    paths:
     - 'stocks/'
   pull_request:
     types: [opened, synchronize, reopened]
