@@ -36,4 +36,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STOCKS }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=pedroblome_HomeBroker_user
+        run: mvn -f stocks/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
