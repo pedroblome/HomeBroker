@@ -1,10 +1,10 @@
-name: user
+name: Build
 on:
   push:
     branches:
-    - master
-     paths:
-    - 'user/'
+      - master
+    paths: 
+      - 'user/'
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -34,5 +34,5 @@ jobs:
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_USER  }}
-        run: mvn -f user/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar_user
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_USER }}
+        run: mvn -f user/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
