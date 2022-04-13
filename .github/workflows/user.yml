@@ -2,9 +2,9 @@ name: user
 on:
   push:
     branches:
-      - master
+    - master
     paths:
-      - 'user/'
+    - 'user/'
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
