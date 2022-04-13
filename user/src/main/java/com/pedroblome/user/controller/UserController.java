@@ -32,7 +32,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    //teste sonarCloudUser
     @GetMapping
     public List<User> getAll() {
 
