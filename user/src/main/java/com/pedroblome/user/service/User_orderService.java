@@ -80,7 +80,6 @@ public class User_orderService {
               if (user_order.getType() == 1) {
                 userRepository.getById(user_order.getId_user()).setDollar_balance(newBalance);
               }
-              botServices.createOrdersBot(token);
               User_order orderSave = user_orderRepository.save(user_order);
               matchOrder(user_order, token);
 
@@ -132,9 +131,19 @@ public class User_orderService {
   public ResponseEntity<User_order> deleteOrder(@PathVariable("order_id") Long order_id, String token) {
 
     User_order user_order = user_orderRepository.getById(order_id);
-    BigDecimal dollarBalanceUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
-    BigDecimal reversal = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getRemaing_volume()));
-    userRepository.getById(user_order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+
+    if (user_order.getType() == 0) {
+      user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock())
+          .setVolume(user_order.getRemaing_volume());
+      user_stock_balanceRepository
+          .save(user_stock_balanceRepository.findByUserStock(user_order.getId_user(), user_order.getId_stock()));
+    } else {
+      BigDecimal dollarBalanceUser = userRepository.getById(user_order.getId_user()).getDollar_balance();
+      BigDecimal reversal = user_order.getPrice().multiply(BigDecimal.valueOf(user_order.getRemaing_volume()));
+      userRepository.getById(user_order.getId_user()).setDollar_balance(dollarBalanceUser.add(reversal));
+      userRepository.save(userRepository.getById(user_order.getId_user()));
+    }
+
     user_order.setStatus(0);
     User_order orderDelete = user_orderRepository.save(user_order);
 
@@ -194,8 +203,6 @@ public class User_orderService {
     return false;
 
   }
-
-  // consulta o body de um post order, name=id=symbol
 
   public Boolean checkStock(Stockdto stockdto, String token, User_order user_order) {
     try {

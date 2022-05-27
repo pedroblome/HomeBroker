@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pedroblome.user.model.User_order;
 import com.pedroblome.user.repository.User_orderRepository;
+import com.pedroblome.user.service.BotServices;
 import com.pedroblome.user.service.User_orderService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,10 @@ public class User_orderController {
 
     @Autowired
     private User_orderService user_orderService;
+
+
+    @Autowired
+    private BotServices botServices;
 
     @GetMapping
     public List<User_order> list() {

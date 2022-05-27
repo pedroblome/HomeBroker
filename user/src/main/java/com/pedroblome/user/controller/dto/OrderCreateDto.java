@@ -90,6 +90,13 @@ public class OrderCreateDto {
         this.stock_name = stock_name;
         this.stock_symbol = stock_symbol;
     }
+
+    @Override
+    public String toString() {
+        return "OrderCreateDto [id_stock=" + id_stock + ", id_user=" + id_user + ", price=" + price + ", status="
+                + status + ", stock_name=" + stock_name + ", stock_symbol=" + stock_symbol + ", type=" + type
+                + ", volume=" + volume + "]";
+    }
     
 
 }

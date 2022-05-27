@@ -3,8 +3,11 @@ package com.pedroblome.user.repository;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import com.pedroblome.user.model.User_stock_balance;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -23,9 +26,10 @@ public interface User_stock_balanceRepository extends JpaRepository<User_stock_b
     @Query(value = "select * from user_stock_balance where id_user = ?1 and id_stock = ?2", nativeQuery = true)
     User_stock_balance findByUserStock( long idUser, long idStock);
 
+    @Transactional
+    @Modifying
     @Query(value = "INSERT INTO public.user_stock_balance  (id_stock, id_user, created_on, stock_name, stock_symbol, updated_on, volume)  VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7)", nativeQuery = true)
-    User_stock_balance createStockBalance(long id_stock, long id_user,Timestamp created_on, String stock_name, String stock_symbol, Timestamp updated_on, Integer volume);
-    //cria stock ballance com volume = 0
+    void createStockBalance(long id_stock, long id_user,Timestamp created_on, String stock_name, String stock_symbol, Timestamp updated_on, Integer volume);
 
 
 

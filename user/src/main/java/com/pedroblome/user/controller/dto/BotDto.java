@@ -62,4 +62,11 @@ public class BotDto {
 
     }
 
+    @Override
+    public String toString() {
+        return "BotDto [bot=" + bot + ", dollar_balance=" + dollar_balance + ", email=" + email + ", name=" + name
+                + ", password=" + password + "]";
+    }
+    
+
 }
