@@ -3,7 +3,7 @@ version: "3"
 services:
 
   apiUser:
-    image: "apiuser:v1"
+    image: "apiuser"
     ports:
       - 8088:8088
     environment:
@@ -11,7 +11,7 @@ services:
     restart: always
 
   apiStock:
-    image: "apistock:v1"
+    image: "apistock"
     ports:
       - 8089:8089
     environment:
@@ -19,14 +19,19 @@ services:
     restart: always
 
   database:
-    image: "postgres:latest"
+    image: "postgres"
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: 12345
       POSTGRES_DB: stocks
     volumes:
       - /var/usr/lib/postgresql/14/main
 
     restart: always
+  front:
+    image: "oktafront"
+    ports:
+      - 8080:8080
+
